@@ -1,0 +1,386 @@
+<div class="row">
+    <div class="col-12">
+        <h4 class="mb-4">
+            <i class="bi bi-gear text-primary me-2"></i>
+            System Settings
+        </h4>
+    </div>
+</div>
+
+<div class="row">
+    <!-- General Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-sliders me-2"></i>
+                    General Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="generalSettingsForm">
+                    <div class="mb-3">
+                        <label for="systemName" class="form-label">System Name</label>
+                        <input type="text" class="form-control" id="systemName"
+                               value="<%= settings.systemName || 'Exprsn Auth' %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="systemUrl" class="form-label">System URL</label>
+                        <input type="url" class="form-control" id="systemUrl"
+                               value="<%= settings.systemUrl || '' %>"
+                               placeholder="https://auth.example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminEmail" class="form-label">Admin Email</label>
+                        <input type="email" class="form-control" id="adminEmail"
+                               value="<%= settings.adminEmail || '' %>"
+                               placeholder="admin@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="maintenanceMode"
+                                   <%= settings.maintenanceMode ? 'checked' : '' %>>
+                            <label class="form-check-label" for="maintenanceMode">
+                                Maintenance Mode
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            When enabled, only admins can access the system
+                        </small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    Security Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="securitySettingsForm">
+                    <div class="mb-3">
+                        <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                        <input type="number" class="form-control" id="sessionTimeout"
+                               value="<%= settings.sessionTimeout || 60 %>" min="5" max="1440">
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxLoginAttempts" class="form-label">Max Login Attempts</label>
+                        <input type="number" class="form-control" id="maxLoginAttempts"
+                               value="<%= settings.maxLoginAttempts || 5 %>" min="3" max="10">
+                    </div>
+                    <div class="mb-3">
+                        <label for="lockoutDuration" class="form-label">Lockout Duration (minutes)</label>
+                        <input type="number" class="form-control" id="lockoutDuration"
+                               value="<%= settings.lockoutDuration || 30 %>" min="5" max="1440">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="requireMfa"
+                                   <%= settings.requireMfa ? 'checked' : '' %>>
+                            <label class="form-check-label" for="requireMfa">
+                                Require MFA for all users
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="requireEmailVerification"
+                                   <%= settings.requireEmailVerification !== false ? 'checked' : '' %>>
+                            <label class="form-check-label" for="requireEmailVerification">
+                                Require email verification
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- OAuth2 / OIDC Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-key me-2"></i>
+                    OAuth2 / OIDC Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="oauth2SettingsForm">
+                    <div class="mb-3">
+                        <label for="oidcIssuer" class="form-label">OIDC Issuer</label>
+                        <input type="url" class="form-control" id="oidcIssuer"
+                               value="<%= settings.oidcIssuer || '' %>"
+                               placeholder="https://auth.example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="accessTokenLifetime" class="form-label">Access Token Lifetime (seconds)</label>
+                        <input type="number" class="form-control" id="accessTokenLifetime"
+                               value="<%= settings.accessTokenLifetime || 3600 %>" min="300" max="86400">
+                    </div>
+                    <div class="mb-3">
+                        <label for="refreshTokenLifetime" class="form-label">Refresh Token Lifetime (seconds)</label>
+                        <input type="number" class="form-control" id="refreshTokenLifetime"
+                               value="<%= settings.refreshTokenLifetime || 2592000 %>" min="3600" max="31536000">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="allowRefreshTokenRotation"
+                                   <%= settings.allowRefreshTokenRotation ? 'checked' : '' %>>
+                            <label class="form-check-label" for="allowRefreshTokenRotation">
+                                Enable refresh token rotation
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAML Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>
+                    SAML Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="samlSettingsForm">
+                    <div class="mb-3">
+                        <label for="samlEntityId" class="form-label">SAML Entity ID</label>
+                        <input type="text" class="form-control" id="samlEntityId"
+                               value="<%= settings.samlEntityId || '' %>"
+                               placeholder="https://auth.example.com/saml/metadata">
+                    </div>
+                    <div class="mb-3">
+                        <label for="samlAcsUrl" class="form-label">Assertion Consumer Service URL</label>
+                        <input type="url" class="form-control" id="samlAcsUrl"
+                               value="<%= settings.samlAcsUrl || '' %>"
+                               placeholder="https://auth.example.com/saml/acs">
+                    </div>
+                    <div class="mb-3">
+                        <label for="samlCertificate" class="form-label">SAML Certificate</label>
+                        <textarea class="form-control font-monospace" id="samlCertificate" rows="4"
+                                  placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"><%= settings.samlCertificate || '' %></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="samlEnabled"
+                                   <%= settings.samlEnabled ? 'checked' : '' %>>
+                            <label class="form-check-label" for="samlEnabled">
+                                Enable SAML
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-envelope me-2"></i>
+                    Email Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="emailSettingsForm">
+                    <div class="mb-3">
+                        <label for="emailProvider" class="form-label">Email Provider</label>
+                        <select class="form-select" id="emailProvider">
+                            <option value="smtp" <%= settings.emailProvider === 'smtp' ? 'selected' : '' %>>SMTP</option>
+                            <option value="sendgrid" <%= settings.emailProvider === 'sendgrid' ? 'selected' : '' %>>SendGrid</option>
+                            <option value="ses" <%= settings.emailProvider === 'ses' ? 'selected' : '' %>>Amazon SES</option>
+                            <option value="mailgun" <%= settings.emailProvider === 'mailgun' ? 'selected' : '' %>>Mailgun</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailFromAddress" class="form-label">From Address</label>
+                        <input type="email" class="form-control" id="emailFromAddress"
+                               value="<%= settings.emailFromAddress || '' %>"
+                               placeholder="noreply@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailFromName" class="form-label">From Name</label>
+                        <input type="text" class="form-control" id="emailFromName"
+                               value="<%= settings.emailFromName || 'Exprsn Auth' %>">
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary" id="testEmailBtn">
+                            <i class="bi bi-envelope-check"></i> Send Test Email
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logging Settings -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-text me-2"></i>
+                    Logging & Audit
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="loggingSettingsForm">
+                    <div class="mb-3">
+                        <label for="logLevel" class="form-label">Log Level</label>
+                        <select class="form-select" id="logLevel">
+                            <option value="error" <%= settings.logLevel === 'error' ? 'selected' : '' %>>Error</option>
+                            <option value="warn" <%= settings.logLevel === 'warn' ? 'selected' : '' %>>Warning</option>
+                            <option value="info" <%= settings.logLevel === 'info' ? 'selected' : '' %>>Info</option>
+                            <option value="debug" <%= settings.logLevel === 'debug' ? 'selected' : '' %>>Debug</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="auditRetentionDays" class="form-label">Audit Log Retention (days)</label>
+                        <input type="number" class="form-control" id="auditRetentionDays"
+                               value="<%= settings.auditRetentionDays || 90 %>" min="30" max="365">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enableAuditLog"
+                                   <%= settings.enableAuditLog !== false ? 'checked' : '' %>>
+                            <label class="form-check-label" for="enableAuditLog">
+                                Enable audit logging
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="logSensitiveData"
+                                   <%= settings.logSensitiveData ? 'checked' : '' %>>
+                            <label class="form-check-label" for="logSensitiveData">
+                                Log sensitive data (not recommended for production)
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% locals.scripts = `
+<script>
+    // Save settings helper
+    async function saveSettings(formId, endpoint) {
+        const form = document.getElementById(formId);
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Handle checkboxes
+        form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            data[cb.id] = cb.checked;
+        });
+
+        try {
+            const response = await fetch(\`/api/settings/\${endpoint}\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Settings saved successfully');
+            } else {
+                alert('Failed to save settings');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while saving settings');
+        }
+    }
+
+    // General settings
+    document.getElementById('generalSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('generalSettingsForm', 'general');
+    });
+
+    // Security settings
+    document.getElementById('securitySettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('securitySettingsForm', 'security');
+    });
+
+    // OAuth2 settings
+    document.getElementById('oauth2SettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('oauth2SettingsForm', 'oauth2');
+    });
+
+    // SAML settings
+    document.getElementById('samlSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('samlSettingsForm', 'saml');
+    });
+
+    // Email settings
+    document.getElementById('emailSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('emailSettingsForm', 'email');
+    });
+
+    // Logging settings
+    document.getElementById('loggingSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings('loggingSettingsForm', 'logging');
+    });
+
+    // Test email
+    document.getElementById('testEmailBtn').addEventListener('click', async function() {
+        const email = prompt('Enter email address to send test email:');
+        if (!email) return;
+
+        try {
+            const response = await fetch('/api/settings/test-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (response.ok) {
+                alert('Test email sent successfully');
+            } else {
+                alert('Failed to send test email');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while sending test email');
+        }
+    });
+</script>
+`; %>

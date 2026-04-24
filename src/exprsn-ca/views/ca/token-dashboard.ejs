@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Dashboard - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .token-type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .token-type-time { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .token-type-use { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .token-type-persistent { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+
+        .resource-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .permission-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            margin: 0.125rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .perm-read { background: #d4edda; color: #155724; }
+        .perm-write { background: #fff3cd; color: #856404; }
+        .perm-update { background: #d1ecf1; color: #0c5460; }
+        .perm-delete { background: #f8d7da; color: #721c24; }
+        .perm-append { background: #e2e3e5; color: #383d41; }
+
+        .quick-action-card {
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .quick-action-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card {
+            border-left: 4px solid;
+        }
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .token-list-item {
+            transition: background 0.2s;
+        }
+        .token-list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .token-display {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .permission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container-fluid mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 mb-2">
+                    <i class="bi bi-key-fill text-primary"></i>
+                    Token Dashboard
+                </h1>
+                <p class="text-muted">Generate and manage CA tokens with fine-grained permissions (Token Spec v1.0)</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Tokens</h6>
+                                <h2 class="mb-0" id="statTotal">0</h2>
+                            </div>
+                            <div class="stat-icon text-primary">
+                                <i class="bi bi-key"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Active Tokens</h6>
+                                <h2 class="mb-0" id="statActive">0</h2>
+                            </div>
+                            <div class="stat-icon text-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-warning h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Expiring Soon</h6>
+                                <h2 class="mb-0" id="statExpiring">0</h2>
+                            </div>
+                            <div class="stat-icon text-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-danger h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Revoked</h6>
+                                <h2 class="mb-0" id="statRevoked">0</h2>
+                            </div>
+                            <div class="stat-icon text-danger">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#generateTokenModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-plus-circle-fill"></i>
+                        </div>
+                        <h5 class="mb-2">Generate Token</h5>
+                        <p class="text-muted mb-0">Create a new CA token with custom permissions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#validateTokenModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h5 class="mb-2">Validate Token</h5>
+                        <p class="text-muted mb-0">Check token validity and permissions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#batchValidateModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-list-check"></i>
+                        </div>
+                        <h5 class="mb-2">Batch Validate</h5>
+                        <p class="text-muted mb-0">Validate multiple tokens at once</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token List -->
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul"></i>
+                            Tokens
+                        </h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="filterType">
+                                    <option value="">All Types</option>
+                                    <option value="time">Time-based</option>
+                                    <option value="use">Use-based</option>
+                                    <option value="persistent">Persistent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="filterResource">
+                                    <option value="">All Resources</option>
+                                    <option value="url">URL</option>
+                                    <option value="did">DID</option>
+                                    <option value="cid">CID</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="filterStatus">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="revoked">Revoked</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-sm btn-primary w-100" onclick="loadTokens()">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resource</th>
+                                <th>Type</th>
+                                <th>Permissions</th>
+                                <th>Expiry</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tokenList">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generate Token Modal -->
+    <div class="modal fade" id="generateTokenModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        Generate CA Token
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateTokenForm">
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate & Resource</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Signing Certificate *</label>
+                                <select class="form-select" name="certificateId" id="certSelect" required>
+                                    <option value="">Select a certificate...</option>
+                                </select>
+                                <small class="form-text text-muted">The certificate used to sign this token</small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Resource Type *</label>
+                                    <select class="form-select" name="resourceType" required>
+                                        <option value="url">URL</option>
+                                        <option value="did">DID</option>
+                                        <option value="cid">CID</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-9 mb-3">
+                                    <label class="form-label">Resource Value *</label>
+                                    <input type="text" class="form-control" name="resourceValue"
+                                           placeholder="https://api.example.com/*, did:example:123, or ipfs://..."
+                                           required>
+                                    <small class="form-text text-muted">Use * for wildcards in URLs</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Permissions</h6>
+
+                            <div class="permission-grid">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="permRead" name="permissionRead">
+                                    <label class="form-check-label" for="permRead">
+                                        <strong>Read</strong><br>
+                                        <small class="text-muted">View/retrieve data</small>
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="permWrite" name="permissionWrite">
+                                    <label class="form-check-label" for="permWrite">
+                                        <strong>Write</strong><br>
+                                        <small class="text-muted">Create new data</small>
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="permUpdate" name="permissionUpdate">
+                                    <label class="form-check-label" for="permUpdate">
+                                        <strong>Update</strong><br>
+                                        <small class="text-muted">Modify existing data</small>
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="permDelete" name="permissionDelete">
+                                    <label class="form-check-label" for="permDelete">
+                                        <strong>Delete</strong><br>
+                                        <small class="text-muted">Remove data</small>
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="permAppend" name="permissionAppend">
+                                    <label class="form-check-label" for="permAppend">
+                                        <strong>Append</strong><br>
+                                        <small class="text-muted">Add to existing data</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Expiry Configuration</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Expiry Type *</label>
+                                <select class="form-select" name="expiryType" id="expiryType" required onchange="toggleExpiryFields()">
+                                    <option value="time">Time-based (expires at specific date/time)</option>
+                                    <option value="use">Use-based (expires after N uses)</option>
+                                    <option value="persistent">Persistent (never expires)</option>
+                                </select>
+                            </div>
+
+                            <div id="timeExpiryFields">
+                                <label class="form-label">Expiry Time *</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <select class="form-select" id="timePreset" onchange="setExpiryPreset()">
+                                            <option value="">Custom...</option>
+                                            <option value="1h">1 Hour</option>
+                                            <option value="24h">24 Hours</option>
+                                            <option value="7d">7 Days</option>
+                                            <option value="30d">30 Days</option>
+                                            <option value="90d">90 Days</option>
+                                            <option value="1y">1 Year</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <input type="number" class="form-control" name="expirySeconds" id="expirySeconds"
+                                               placeholder="Seconds from now" min="60">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="useExpiryFields" style="display:none;">
+                                <label class="form-label">Maximum Uses *</label>
+                                <input type="number" class="form-control" name="maxUses" min="1" placeholder="Number of allowed uses">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateToken()">
+                        <i class="bi bi-plus-circle-fill"></i> Generate Token
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validate Token Modal -->
+    <div class="modal fade" id="validateTokenModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-check"></i>
+                        Validate Token
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="validateTokenForm">
+                        <div class="mb-3">
+                            <label class="form-label">Token ID or Full Token *</label>
+                            <textarea class="form-control font-monospace" name="token" rows="8"
+                                      placeholder="Paste token ID or full JSON token object"
+                                      required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Required Permissions (Optional)</label>
+                            <div class="permission-grid">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="valPermRead" name="requiredRead">
+                                    <label class="form-check-label" for="valPermRead">Read</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="valPermWrite" name="requiredWrite">
+                                    <label class="form-check-label" for="valPermWrite">Write</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="valPermUpdate" name="requiredUpdate">
+                                    <label class="form-check-label" for="valPermUpdate">Update</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="valPermDelete" name="requiredDelete">
+                                    <label class="form-check-label" for="valPermDelete">Delete</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Resource to Access (Optional)</label>
+                            <input type="text" class="form-control" name="resourceValue"
+                                   placeholder="https://api.example.com/resource/123">
+                        </div>
+
+                        <div id="validationResult" class="mt-3" style="display:none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="validateToken()">
+                        <i class="bi bi-shield-check"></i> Validate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Detail Modal -->
+    <div class="modal fade" id="tokenDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-key"></i>
+                        Token Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="tokenDetailContent">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Token Modal -->
+    <div class="modal fade" id="generatedTokenModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Token Generated Successfully
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Important:</strong> Save this token securely. It will not be shown again!
+                    </div>
+                    <label class="form-label">Token (JSON)</label>
+                    <div class="token-display" id="generatedTokenContent"></div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-primary" onclick="copyGeneratedToken()">
+                            <i class="bi bi-clipboard"></i> Copy to Clipboard
+                        </button>
+                        <button class="btn btn-success" onclick="downloadGeneratedToken()">
+                            <i class="bi bi-download"></i> Download JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/token-dashboard.js"></script>
+</body>
+</html>

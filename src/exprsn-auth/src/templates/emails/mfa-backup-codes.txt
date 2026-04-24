@@ -1,0 +1,35 @@
+Your MFA Backup Codes
+
+Hi {{displayName}},
+
+You've successfully enabled two-factor authentication (MFA) on your {{appName}} account. Great job securing your account!
+
+IMPORTANT: Save these backup codes in a safe place. You can use them to access your account if you lose access to your authenticator device.
+
+YOUR BACKUP CODES:
+{{#each backupCodes}}
+{{this}}
+{{/each}}
+
+Each code can only be used once.
+
+How to Use Backup Codes:
+1. When prompted for your authenticator code, enter one of these backup codes instead
+2. Each code can only be used once
+3. Generate new codes from your security settings when you run low
+
+Keep These Codes Secure:
+- Store them in a password manager or encrypted file
+- Print them and keep in a safe place
+- Don't share them with anyone
+- Don't store them in plain text on your device
+
+Manage your security settings: {{securityUrl}}
+
+You can generate new backup codes at any time from your security settings. When you generate new codes, the old ones will stop working.
+
+---
+Need help? Contact us at support@exprsn.io
+{{appName}}: {{appUrl}}
+
+This is a security notification. You're receiving this because you enabled MFA on your {{appName}} account.

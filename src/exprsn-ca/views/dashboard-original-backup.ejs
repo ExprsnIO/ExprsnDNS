@@ -1,0 +1,98 @@
+<div class="row">
+    <div class="col-12">
+        <h1>Dashboard</h1>
+        <p class="lead">Welcome, <%= user.username %>!</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">My Certificates</h5>
+            </div>
+            <div class="card-body">
+                <% if (certificates.length === 0) { %>
+                    <p class="text-muted">No certificates found.</p>
+                    <a href="/certificates/new" class="btn btn-primary">Generate Certificate</a>
+                <% } else { %>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Common Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Expires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% certificates.forEach(cert => { %>
+                                <tr>
+                                    <td><a href="/certificates/<%= cert.id %>"><%= cert.commonName %></a></td>
+                                    <td><%= cert.type %></td>
+                                    <td><span class="badge bg-<%= cert.status === 'active' ? 'success' : 'danger' %>"><%= cert.status %></span></td>
+                                    <td><%= new Date(cert.notAfter).toLocaleDateString() %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                    <a href="/certificates" class="btn btn-outline-primary">View All</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">My Tokens</h5>
+            </div>
+            <div class="card-body">
+                <% if (tokens.length === 0) { %>
+                    <p class="text-muted">No tokens found.</p>
+                    <a href="/tokens/new" class="btn btn-success">Generate Token</a>
+                <% } else { %>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% tokens.forEach(token => { %>
+                                <tr>
+                                    <td><code><%= token.resourceValue.substring(0, 30) %>...</code></td>
+                                    <td><%= token.expiryType %></td>
+                                    <td><span class="badge bg-<%= token.status === 'active' ? 'success' : 'danger' %>"><%= token.status %></span></td>
+                                    <td><%= new Date(token.createdAt).toLocaleDateString() %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                    <a href="/tokens" class="btn btn-outline-success">View All</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group" role="group">
+                    <a href="/certificates/new" class="btn btn-outline-primary">Generate Certificate</a>
+                    <a href="/tokens/new" class="btn btn-outline-success">Generate Token</a>
+                    <a href="/tickets" class="btn btn-outline-warning">Manage Tickets</a>
+                    <a href="/ca" class="btn btn-outline-dark">CA Administration</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

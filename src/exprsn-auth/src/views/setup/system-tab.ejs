@@ -1,0 +1,129 @@
+<!-- System Status Tab -->
+<div class="tab-pane fade show active" id="system" role="tabpanel">
+  <div class="form-section">
+    <h3><i class="bi bi-info-circle"></i> System Status</h3>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-database text-primary"></i> Database
+            </h5>
+            <p class="mb-2">
+              <span class="status-dot success"></span>
+              <strong>Status:</strong> Connected
+            </p>
+            <p class="mb-0 text-muted small">
+              Database: <%= process.env.AUTH_DB_NAME || 'exprsn_auth' %><br>
+              Host: <%= process.env.AUTH_DB_HOST || 'localhost' %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-shield-check text-<%= caStatus.available ? 'success' : 'warning' %>"></i> Certificate Authority
+            </h5>
+            <p class="mb-2">
+              <span class="status-dot <%= caStatus.available ? 'success' : 'warning' %>"></span>
+              <strong>Status:</strong> <%= caStatus.available ? 'Available' : caStatus.configured ? 'Configured but Offline' : 'Not Configured' %>
+            </p>
+            <% if (caStatus.url) { %>
+            <p class="mb-0 text-muted small">
+              URL: <%= caStatus.url %>
+            </p>
+            <% } else { %>
+            <p class="mb-0 text-muted small">
+              Set CA_URL in environment to enable
+            </p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-server text-info"></i> Redis Cache
+            </h5>
+            <p class="mb-2">
+              <span class="status-dot <%= process.env.REDIS_ENABLED === 'true' ? 'success' : 'warning' %>"></span>
+              <strong>Status:</strong> <%= process.env.REDIS_ENABLED === 'true' ? 'Enabled' : 'Disabled' %>
+            </p>
+            <p class="mb-0 text-muted small">
+              Host: <%= process.env.REDIS_HOST || 'localhost' %>:<%=process.env.REDIS_PORT || '6379' %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-lock text-success"></i> TLS/HTTPS
+            </h5>
+            <p class="mb-2">
+              <span class="status-dot success"></span>
+              <strong>Status:</strong> Enabled
+            </p>
+            <p class="mb-0 text-muted small">
+              Running on https://localhost:<%= process.env.AUTH_SERVICE_PORT || 3001 %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3><i class="bi bi-gear"></i> Service Configuration</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td><strong>Service Name</strong></td>
+          <td>exprsn-auth</td>
+        </tr>
+        <tr>
+          <td><strong>Version</strong></td>
+          <td>1.0.0</td>
+        </tr>
+        <tr>
+          <td><strong>Environment</strong></td>
+          <td><span class="badge bg-<%= process.env.NODE_ENV === 'production' ? 'danger' : 'warning' %>"><%= process.env.NODE_ENV || 'development' %></span></td>
+        </tr>
+        <tr>
+          <td><strong>Port</strong></td>
+          <td><%= process.env.AUTH_SERVICE_PORT || 3001 %></td>
+        </tr>
+        <tr>
+          <td><strong>OIDC Issuer</strong></td>
+          <td><code><%= oidcIssuer %></code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="form-section">
+    <h3><i class="bi bi-shield-check"></i> Security Features</h3>
+    <div class="alert alert-success">
+      <h5 class="alert-heading"><i class="bi bi-check-circle"></i> Active Security Measures</h5>
+      <ul class="mb-0">
+        <li>✅ CA Token Authentication (RSA-SHA256-PSS)</li>
+        <li>✅ OAuth 2.0 & OpenID Connect Support</li>
+        <li>✅ SAML 2.0 SSO Integration</li>
+        <li>✅ Multi-Factor Authentication (TOTP + SMS)</li>
+        <li>✅ Session Management with Redis</li>
+        <li>✅ Rate Limiting & DDoS Protection</li>
+        <li>✅ CORS Configuration</li>
+        <li>✅ Helmet Security Headers</li>
+        <li>✅ TLS/HTTPS Encryption</li>
+      </ul>
+    </div>
+  </div>
+</div>

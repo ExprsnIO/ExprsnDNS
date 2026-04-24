@@ -1,0 +1,305 @@
+<!-- Hero Section -->
+<div class="hero-section mb-5">
+    <div class="hero-content">
+        <div class="hero-icon mb-4">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <h1 class="hero-title mb-3">Exprsn Certificate Authority</h1>
+        <p class="hero-subtitle mb-4">
+            Enterprise-grade PKI infrastructure with advanced token-based authentication.
+            Generate X.509 certificates, manage CA tokens, and secure your microservices ecosystem.
+        </p>
+        <div class="hero-actions">
+            <% if (!user) { %>
+                <a class="btn btn-light btn-lg shadow-sm me-3" href="/auth/login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Sign In
+                </a>
+                <a class="btn btn-outline-light btn-lg shadow-sm" href="/auth/register">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Register
+                </a>
+            <% } else { %>
+                <a class="btn btn-light btn-lg shadow-sm" href="/dashboard">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>
+                    Go to Dashboard
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(102, 126, 234, 0.1); color: var(--exprsn-primary);">
+                <i class="bi bi-file-earmark-lock"></i>
+            </div>
+            <div class="stat-value"><%= stats.totalCertificates %></div>
+            <div class="stat-label">Total Certificates</div>
+            <div class="stat-meta text-muted mt-2 small">
+                <i class="bi bi-check-circle text-success me-1"></i>
+                <%= stats.activeCertificates %> active
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--exprsn-success);">
+                <i class="bi bi-key"></i>
+            </div>
+            <div class="stat-value"><%= stats.totalTokens %></div>
+            <div class="stat-label">CA Tokens</div>
+            <div class="stat-meta text-muted mt-2 small">
+                <i class="bi bi-lightning-charge text-warning me-1"></i>
+                <%= stats.activeTokens %> active
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--exprsn-warning);">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-value"><%= stats.totalUsers %></div>
+            <div class="stat-label">Registered Users</div>
+            <div class="stat-meta text-muted mt-2 small">
+                <i class="bi bi-person-check text-success me-1"></i>
+                Verified accounts
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--exprsn-success);">
+                <i class="bi bi-activity"></i>
+            </div>
+            <div class="stat-value">
+                <i class="bi bi-circle-fill text-success pulse-icon"></i>
+                Operational
+            </div>
+            <div class="stat-label">System Status</div>
+            <div class="stat-meta text-muted mt-2 small">
+                <i class="bi bi-clock me-1"></i>
+                All services running
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h5 class="card-title">X.509 Certificate Management</h5>
+                <p class="card-text text-muted">
+                    Generate, manage, and revoke X.509 certificates with comprehensive
+                    lifecycle management. Support for RSA and ECDSA key algorithms.
+                </p>
+                <% if (user) { %>
+                    <a href="/certificates" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-arrow-right me-1"></i>
+                        Manage Certificates
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <h5 class="card-title">CA Token System</h5>
+                <p class="card-text text-muted">
+                    Advanced token-based authentication with fine-grained permissions.
+                    Support for time-based, use-based, and persistent tokens.
+                </p>
+                <% if (user) { %>
+                    <a href="/tokens" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-arrow-right me-1"></i>
+                        Manage Tokens
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+                <h5 class="card-title">Microservices Integration</h5>
+                <p class="card-text text-muted">
+                    Seamlessly integrate with 18+ Exprsn microservices. Built-in OCSP
+                    responder and CRL distribution for certificate validation.
+                </p>
+                <% if (user) { %>
+                    <a href="/ca" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-right me-1"></i>
+                        CA Administration
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Features -->
+<div class="card border-0 shadow-sm mb-5">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-3">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    Enterprise-Grade Security
+                </h4>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>RSA-SHA256-PSS Signatures</strong> - Cryptographically secure token signing
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>OCSP &amp; CRL Support</strong> - Real-time certificate validation
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Fine-Grained Permissions</strong> - Resource-level access control
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Audit Logging</strong> - Comprehensive security audit trails
+                    </li>
+                    <li class="mb-0">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>High Availability</strong> - Cluster mode with Redis caching
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="security-badge">
+                    <i class="bi bi-shield-fill-check"></i>
+                    <div class="mt-2">
+                        <strong>WCAG 2.1</strong><br>
+                        <span class="text-muted small">Level AA Compliant</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (!user) { %>
+<!-- Call to Action -->
+<div class="card border-0 shadow-sm bg-gradient">
+    <div class="card-body p-5 text-center text-white">
+        <h3 class="mb-3">Ready to Get Started?</h3>
+        <p class="lead mb-4">
+            Join the Exprsn ecosystem and secure your services with enterprise-grade PKI infrastructure.
+        </p>
+        <a href="/auth/register" class="btn btn-light btn-lg shadow-sm">
+            <i class="bi bi-person-plus me-2"></i>
+            Create Your Account
+        </a>
+    </div>
+</div>
+<% } %>
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+        border-radius: 12px;
+        padding: 4rem 2rem;
+        color: white;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .hero-icon {
+        font-size: 4rem;
+        opacity: 0.9;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.95;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+
+    /* Feature Icons */
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+    }
+
+    /* Security Badge */
+    .security-badge {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2.5rem;
+    }
+
+    /* Gradient Card */
+    .bg-gradient {
+        background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+    }
+
+    /* Pulse Animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .pulse-icon {
+        animation: pulse 2s ease-in-out infinite;
+        font-size: 0.75rem;
+        vertical-align: middle;
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .card {
+        background: var(--bs-dark);
+    }
+
+    [data-bs-theme="dark"] .hero-section {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+</style>

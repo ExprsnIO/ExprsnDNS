@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="/tokens" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                    <h1><i class="bi bi-key"></i> <%= title %></h1>
+                </div>
+
+                <% if (locals.error) { %>
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <% } %>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/tokens" method="POST" id="tokenForm">
+                            <div class="mb-3">
+                                <label for="certificateId" class="form-label">Signing Certificate *</label>
+                                <select class="form-select" id="certificateId" name="certificateId" required>
+                                    <option value="">Select a certificate...</option>
+                                    <% if (certificates && certificates.length > 0) { %>
+                                        <% certificates.forEach(cert => { %>
+                                        <option value="<%= cert.id %>" <%= locals.oldInput?.certificateId === cert.id ? 'selected' : '' %>>
+                                            <%= cert.commonName %> (<%= cert.certificateType %>) - Expires <%= new Date(cert.expiresAt).toLocaleDateString() %>
+                                        </option>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <option value="" disabled>No active certificates available</option>
+                                    <% } %>
+                                </select>
+                                <div class="form-text">The certificate used to sign this token</div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">Resource Target</h5>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="resourceType" class="form-label">Resource Type *</label>
+                                    <select class="form-select" id="resourceType" name="resourceType" required>
+                                        <option value="url" <%= locals.oldInput?.resourceType === 'url' ? 'selected' : 'selected' %>>URL</option>
+                                        <option value="did" <%= locals.oldInput?.resourceType === 'did' ? 'selected' : '' %>>DID</option>
+                                        <option value="cid" <%= locals.oldInput?.resourceType === 'cid' ? 'selected' : '' %>>CID</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-8 mb-3">
+                                    <label for="resourceValue" class="form-label">Resource Value *</label>
+                                    <input type="text" class="form-control" id="resourceValue" name="resourceValue"
+                                           value="<%= locals.oldInput?.resourceValue || '' %>" required
+                                           placeholder="https://api.example.com/*">
+                                    <div class="form-text">The resource this token grants access to</div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">Permissions</h5>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="permissionRead" name="permissionRead" <%= locals.oldInput?.permissionRead ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="permissionRead">
+                                            <strong>Read</strong> - View/retrieve data
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="permissionWrite" name="permissionWrite" <%= locals.oldInput?.permissionWrite ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="permissionWrite">
+                                            <strong>Write</strong> - Create new data
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="permissionAppend" name="permissionAppend" <%= locals.oldInput?.permissionAppend ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="permissionAppend">
+                                            <strong>Append</strong> - Add to existing data
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="permissionUpdate" name="permissionUpdate" <%= locals.oldInput?.permissionUpdate ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="permissionUpdate">
+                                            <strong>Update</strong> - Modify existing data
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="permissionDelete" name="permissionDelete" <%= locals.oldInput?.permissionDelete ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="permissionDelete">
+                                            <strong>Delete</strong> - Remove data
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col"></div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">Expiry Configuration</h5>
+
+                            <div class="mb-3">
+                                <label for="expiryType" class="form-label">Expiry Type *</label>
+                                <select class="form-select" id="expiryType" name="expiryType" required>
+                                    <option value="time" <%= locals.oldInput?.expiryType === 'time' ? 'selected' : 'selected' %>>Time-based</option>
+                                    <option value="use" <%= locals.oldInput?.expiryType === 'use' ? 'selected' : '' %>>Use-based</option>
+                                    <option value="persistent" <%= locals.oldInput?.expiryType === 'persistent' ? 'selected' : '' %>>Persistent</option>
+                                </select>
+                            </div>
+
+                            <div id="timeExpiry" class="mb-3">
+                                <label for="expirySeconds" class="form-label">Expires In (seconds)</label>
+                                <select class="form-select" id="expirySeconds" name="expirySeconds">
+                                    <option value="3600">1 hour</option>
+                                    <option value="86400" selected>1 day</option>
+                                    <option value="604800">1 week</option>
+                                    <option value="2592000">30 days</option>
+                                    <option value="31536000">1 year</option>
+                                </select>
+                            </div>
+
+                            <div id="useExpiry" class="mb-3" style="display: none;">
+                                <label for="maxUses" class="form-label">Maximum Uses</label>
+                                <input type="number" class="form-control" id="maxUses" name="maxUses"
+                                       value="<%= locals.oldInput?.maxUses || '10' %>" min="1">
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="bi bi-key"></i> Generate Token
+                                </button>
+                                <a href="/tokens" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        const expiryTypeSelect = document.getElementById('expiryType');
+        const timeExpiry = document.getElementById('timeExpiry');
+        const useExpiry = document.getElementById('useExpiry');
+
+        expiryTypeSelect.addEventListener('change', function() {
+            if (this.value === 'time') {
+                timeExpiry.style.display = 'block';
+                useExpiry.style.display = 'none';
+            } else if (this.value === 'use') {
+                timeExpiry.style.display = 'none';
+                useExpiry.style.display = 'block';
+            } else {
+                timeExpiry.style.display = 'none';
+                useExpiry.style.display = 'none';
+            }
+        });
+
+        document.getElementById('tokenForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+        });
+    </script>
+</body>
+</html>

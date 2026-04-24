@@ -1,0 +1,289 @@
+# Exprsn Platform .gitignore
+
+# ============================================
+# Node.js & Dependencies
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ============================================
+# Environment & Configuration
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.production
+*.env
+
+# But keep example files
+!.env.example
+!**/.env.example
+
+# ============================================
+# Logs & Runtime
+# ============================================
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+lib-cov/
+
+# ============================================
+# Security & Cryptographic Materials
+# ============================================
+# Private keys and certificates
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
+keys/
+certs/
+certificates/
+private/
+
+# But keep example/template keys for development
+!**/keys/.gitkeep
+!**/certs/.gitkeep
+
+# CA-specific sensitive data
+src/exprsn-ca/ca-database.sqlite
+src/exprsn-ca/serial.txt
+src/exprsn-ca/crl-number.txt
+
+# Secrets and credentials
+secrets/
+credentials/
+*.secret
+
+# ============================================
+# Database
+# ============================================
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL dumps
+*.sql
+*.dump
+
+# Database migration artifacts
+**/migrations/*.backup
+
+# ============================================
+# Testing & Coverage
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+junit.xml
+test-results/
+test-results.json
+
+# Jest
+.jest-cache/
+
+# ============================================
+# Build & Distribution
+# ============================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Compiled binary addons
+build/Release
+
+# ============================================
+# Frontend (React/Vite for exprsn-svr)
+# ============================================
+# Vite
+.vite/
+vite.config.js.timestamp-*
+
+# React build
+src/*/frontend/dist/
+src/*/frontend/build/
+
+# ============================================
+# Cache & Temporary Files
+# ============================================
+.cache/
+.temp/
+.tmp/
+tmp/
+temp/
+
+# Redis dumps
+dump.rdb
+
+# Bull queue data
+.bull/
+
+# ============================================
+# OS-Specific
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# IDE & Editor
+# ============================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+.*.swp
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# File Storage & Uploads
+# ============================================
+# FileVault uploads
+src/exprsn-filevault/uploads/
+src/exprsn-filevault/storage/
+
+# Gallery media
+src/exprsn-gallery/uploads/
+src/exprsn-gallery/media/
+src/exprsn-gallery/thumbnails/
+
+# General uploads
+uploads/
+media/
+files/
+
+# But keep directory structure
+!**/uploads/.gitkeep
+!**/media/.gitkeep
+!**/files/.gitkeep
+
+# ============================================
+# Monitoring & Analytics
+# ============================================
+# Prometheus metrics
+*.prom
+
+# Analytics data
+analytics/
+
+# ============================================
+# Service-Specific
+# ============================================
+# Low-Code Platform (exprsn-svr)
+src/exprsn-svr/lowcode/storage/
+src/exprsn-svr/lowcode/generated/
+
+# Workflow automation
+src/exprsn-workflow/executions/
+src/exprsn-workflow/logs/
+
+# Live streaming
+src/exprsn-live/recordings/
+src/exprsn-live/hls/
+src/exprsn-live/dash/
+
+# Payments
+src/exprsn-payments/receipts/
+
+# Atlas (Geospatial)
+src/exprsn-atlas/tiles/
+src/exprsn-atlas/cache/
+
+# ============================================
+# Documentation Build Artifacts
+# ============================================
+docs/build/
+docs/.vitepress/dist/
+.docusaurus/
+
+# ============================================
+# Backup Files
+# ============================================
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
+# ============================================
+# Misc
+# ============================================
+.npmrc.local
+.yarnrc.local
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.parcel-cache
+
+# ============================================
+# Keep Empty Directories
+# ============================================
+!.gitkeep

@@ -1,0 +1,93 @@
+<div class="row">
+    <div class="col-12">
+        <h1>About Exprsn Certificate Authority</h1>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3>Overview</h3>
+                <p>
+                    The Exprsn Certificate Authority is a complete implementation of the
+                    <strong>Exprsn CA Token Specification v<%= config.version || '1.0' %></strong>.
+                </p>
+
+                <h4 class="mt-4">Features</h4>
+                <ul>
+                    <li>X.509 Certificate Generation and Management</li>
+                    <li>Root, Intermediate, and Entity Certificate Support</li>
+                    <li>SAN (Subject Alternative Name) Certificates</li>
+                    <li>Code Signing Certificates</li>
+                    <li>Token Generation and Validation (Spec v1.0)</li>
+                    <li>OCSP (Online Certificate Status Protocol) Responder</li>
+                    <li>CRL (Certificate Revocation List) Distribution</li>
+                    <li>Role-Based Access Control</li>
+                    <li>Ticket Authentication System</li>
+                    <li>Multi-user Support with Groups and Roles</li>
+                    <li>Cluster/Node Environment Support</li>
+                    <li>Multiple Storage Backends (Disk, S3, PostgreSQL)</li>
+                </ul>
+
+                <h4 class="mt-4">Security</h4>
+                <ul>
+                    <li>RSA-SHA256-PSS Signatures</li>
+                    <li>SHA-256 Checksums</li>
+                    <li>Encrypted Private Keys</li>
+                    <li>Automatic Certificate Revocation</li>
+                    <li>OCSP Stapling Support</li>
+                    <li>Comprehensive Audit Logging</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">CA Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>Name:</th>
+                        <td><%= config.ca.name %></td>
+                    </tr>
+                    <tr>
+                        <th>Domain:</th>
+                        <td><%= config.ca.domain %></td>
+                    </tr>
+                    <tr>
+                        <th>Organization:</th>
+                        <td><%= config.ca.organization %></td>
+                    </tr>
+                    <tr>
+                        <th>Country:</th>
+                        <td><%= config.ca.country %></td>
+                    </tr>
+                </table>
+
+                <h6 class="mt-3">Endpoints</h6>
+                <ul class="list-unstyled small">
+                    <li><strong>API:</strong> /api</li>
+                    <li><strong>OCSP:</strong> /ocsp</li>
+                    <li><strong>CRL:</strong> /crl</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Documentation</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><a href="/docs/token-spec">Token Specification</a></li>
+                    <li><a href="/docs/api">API Reference</a></li>
+                    <li><a href="/docs/integration">Integration Guide</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

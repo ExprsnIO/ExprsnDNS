@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container mt-4">
+        <h1><i class="bi bi-people"></i> <%= title %></h1>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <form class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search users..." value="<%= search || '' %>">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+                    </div>
+                </form>
+
+                <% if (users && users.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                            <tr>
+                                <td><%= user.email %></td>
+                                <td><%= [user.firstName, user.lastName].filter(Boolean).join(' ') || 'N/A' %></td>
+                                <td><span class="badge bg-<%= user.status === 'active' ? 'success' : 'danger' %>"><%= user.status %></span></td>
+                                <td><%= user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never' %></td>
+                                <td>
+                                    <a href="/users/<%= user.id %>" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <% if (pagination && pagination.totalPages > 1) { %>
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>&search=<%= search %>"><%= i %></a>
+                        </li>
+                        <% } %>
+                    </ul>
+                </nav>
+                <% } %>
+                <% } else { %>
+                <div class="text-center py-5">
+                    <p class="text-muted">No users found</p>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

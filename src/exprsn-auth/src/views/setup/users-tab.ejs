@@ -1,0 +1,62 @@
+<!-- Users Tab -->
+<div class="tab-pane fade" id="users" role="tabpanel">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3><i class="bi bi-person-plus"></i> Quick User Creation</h3>
+    <a href="/admin/users" class="btn btn-outline-primary">
+      <i class="bi bi-people"></i> Manage All Users
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form id="createUserForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Display Name</label>
+            <input type="text" class="form-control" name="displayName">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" name="username">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-control" name="password" required minlength="8">
+            <small class="text-muted">Minimum 8 characters</small>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-person-plus"></i> Create User
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-3">
+    <strong><i class="bi bi-info-circle"></i> Note:</strong> Users created here are auto-verified and active.
+    For full user management including roles, groups, and detailed permissions, use the
+    <a href="/admin/users" class="alert-link">Admin Users panel</a>.
+  </div>
+</div>
+
+<script>
+document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+
+  const result = await api.post('/setup/api/users', data);
+  if (result.success) {
+    showAlert(`User created successfully! Email: ${result.data.email}`, 'success');
+    e.target.reset();
+  } else {
+    showAlert('Failed to create user: ' + (result.message || result.error), 'danger');
+  }
+});
+</script>

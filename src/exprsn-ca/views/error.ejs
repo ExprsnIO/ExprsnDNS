@@ -1,0 +1,23 @@
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Error</h4>
+            </div>
+            <div class="card-body">
+                <h2><%= title || 'Error' %></h2>
+                <p class="lead"><%= message %></p>
+
+                <% if (error && error.status) { %>
+                    <p class="text-muted">Error Code: <%= error.status %></p>
+                <% } %>
+
+                <% if (error && error.stack) { %>
+                    <pre class="bg-light p-3"><%= error.stack %></pre>
+                <% } %>
+
+                <a href="/" class="btn btn-primary mt-3">Return Home</a>
+            </div>
+        </div>
+    </div>
+</div>

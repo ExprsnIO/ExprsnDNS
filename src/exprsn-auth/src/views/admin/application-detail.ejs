@@ -1,0 +1,462 @@
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="/admin/applications" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Applications
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Application Profile -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-app-indicator text-primary me-2"></i>
+                    Application Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <h4><%= application.name %></h4>
+
+                <% if (application.type === 'web') { %>
+                <span class="badge bg-primary mb-3">Web Application</span>
+                <% } else if (application.type === 'spa') { %>
+                <span class="badge bg-info mb-3">Single Page App</span>
+                <% } else if (application.type === 'native') { %>
+                <span class="badge bg-success mb-3">Native App</span>
+                <% } else { %>
+                <span class="badge bg-secondary mb-3">Service</span>
+                <% } %>
+
+                <% if (application.enabled) { %>
+                <span class="badge bg-success mb-3">Active</span>
+                <% } else { %>
+                <span class="badge bg-danger mb-3">Disabled</span>
+                <% } %>
+
+                <hr>
+
+                <dl class="row">
+                    <dt class="col-sm-5">App ID:</dt>
+                    <dd class="col-sm-7"><small><code><%= application.id %></code></small></dd>
+
+                    <dt class="col-sm-5">Client ID:</dt>
+                    <dd class="col-sm-7"><small><code><%= application.clientId %></code></small></dd>
+
+                    <dt class="col-sm-5">Organization:</dt>
+                    <dd class="col-sm-7">
+                        <% if (application.Organization) { %>
+                        <a href="/admin/organizations/<%= application.Organization.id %>">
+                            <%= application.Organization.name %>
+                        </a>
+                        <% } else { %>
+                        N/A
+                        <% } %>
+                    </dd>
+
+                    <dt class="col-sm-5">Created:</dt>
+                    <dd class="col-sm-7"><small><%= new Date(application.createdAt).toLocaleString() %></small></dd>
+                </dl>
+
+                <% if (application.description) { %>
+                <hr>
+                <h6>Description</h6>
+                <p class="text-muted small"><%= application.description %></p>
+                <% } %>
+
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAppModal">
+                        <i class="bi bi-pencil"></i> Edit Application
+                    </button>
+                    <button class="btn btn-warning" onclick="rotateSecret('<%= application.id %>')">
+                        <i class="bi bi-key"></i> Rotate Client Secret
+                    </button>
+                    <% if (application.enabled) { %>
+                    <button class="btn btn-warning" onclick="toggleAppStatus('<%= application.id %>', 'disable')">
+                        <i class="bi bi-slash-circle"></i> Disable Application
+                    </button>
+                    <% } else { %>
+                    <button class="btn btn-success" onclick="toggleAppStatus('<%= application.id %>', 'enable')">
+                        <i class="bi bi-check-circle"></i> Enable Application
+                    </button>
+                    <% } %>
+                    <button class="btn btn-outline-danger" onclick="deleteApp('<%= application.id %>')">
+                        <i class="bi bi-trash"></i> Delete Application
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- OAuth2 / OIDC Configuration -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-key text-primary me-2"></i>
+                    OAuth2 / OIDC Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="oauth2ConfigForm">
+                    <div class="mb-3">
+                        <label class="form-label">Allowed Grant Types</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grantAuthCode"
+                                   <%= application.grantTypes?.includes('authorization_code') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="grantAuthCode">
+                                Authorization Code
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grantImplicit"
+                                   <%= application.grantTypes?.includes('implicit') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="grantImplicit">
+                                Implicit
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grantPassword"
+                                   <%= application.grantTypes?.includes('password') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="grantPassword">
+                                Resource Owner Password Credentials
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grantClientCreds"
+                                   <%= application.grantTypes?.includes('client_credentials') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="grantClientCreds">
+                                Client Credentials
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="grantRefreshToken"
+                                   <%= application.grantTypes?.includes('refresh_token') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="grantRefreshToken">
+                                Refresh Token
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="redirectUris" class="form-label">Redirect URIs</label>
+                        <textarea class="form-control font-monospace" id="redirectUris" rows="4"
+                                  placeholder="https://app.example.com/callback&#10;https://app.example.com/oauth/callback"><%= application.redirectUris ? application.redirectUris.join('\n') : '' %></textarea>
+                        <small class="form-text text-muted">One URI per line</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="allowedScopes" class="form-label">Allowed Scopes</label>
+                        <input type="text" class="form-control" id="allowedScopes"
+                               value="<%= application.allowedScopes ? application.allowedScopes.join(' ') : '' %>"
+                               placeholder="openid profile email">
+                        <small class="form-text text-muted">Space-separated list</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="accessTokenLifetime" class="form-label">Access Token Lifetime (seconds)</label>
+                        <input type="number" class="form-control" id="accessTokenLifetime"
+                               value="<%= application.accessTokenLifetime || 3600 %>" min="300" max="86400">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="refreshTokenLifetime" class="form-label">Refresh Token Lifetime (seconds)</label>
+                        <input type="number" class="form-control" id="refreshTokenLifetime"
+                               value="<%= application.refreshTokenLifetime || 2592000 %>" min="3600" max="31536000">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Configuration
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SAML Configuration -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    SAML Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="samlConfigForm">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="samlEnabled"
+                                   <%= application.samlEnabled ? 'checked' : '' %>>
+                            <label class="form-check-label" for="samlEnabled">
+                                Enable SAML for this application
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="samlEntityId" class="form-label">Entity ID</label>
+                        <input type="text" class="form-control" id="samlEntityId"
+                               value="<%= application.samlEntityId || '' %>"
+                               placeholder="https://app.example.com/saml/metadata">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="samlAcsUrl" class="form-label">Assertion Consumer Service URL</label>
+                        <input type="url" class="form-control" id="samlAcsUrl"
+                               value="<%= application.samlAcsUrl || '' %>"
+                               placeholder="https://app.example.com/saml/acs">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="samlAudience" class="form-label">Audience</label>
+                        <input type="text" class="form-control" id="samlAudience"
+                               value="<%= application.samlAudience || '' %>"
+                               placeholder="https://app.example.com">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Configuration
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>
+                    Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <% if (activityLog && activityLog.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>User</th>
+                                <th>IP Address</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% activityLog.forEach(log => { %>
+                            <tr>
+                                <td><small><%= log.event %></small></td>
+                                <td><small><%= log.username || 'Unknown' %></small></td>
+                                <td><code class="small"><%= log.ipAddress %></code></td>
+                                <td><small><%= new Date(log.timestamp).toLocaleString() %></small></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-muted mb-0">No recent activity</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Application Modal -->
+<div class="modal fade" id="editAppModal" tabindex="-1" aria-labelledby="editAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAppModalLabel">Edit Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editAppForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="appName" class="form-label">Application Name</label>
+                        <input type="text" class="form-control" id="appName" value="<%= application.name %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appType" class="form-label">Application Type</label>
+                        <select class="form-select" id="appType" required>
+                            <option value="web" <%= application.type === 'web' ? 'selected' : '' %>>Web Application</option>
+                            <option value="spa" <%= application.type === 'spa' ? 'selected' : '' %>>Single Page Application</option>
+                            <option value="native" <%= application.type === 'native' ? 'selected' : '' %>>Native Application</option>
+                            <option value="service" <%= application.type === 'service' ? 'selected' : '' %>>Service/API</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="appDescription" rows="3"><%= application.description || '' %></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<% locals.scripts = `
+<script>
+    async function toggleAppStatus(appId, action) {
+        if (confirm(\`Are you sure you want to \${action} this application?\`)) {
+            try {
+                const response = await fetch(\`/api/applications/\${appId}/\${action}\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Action failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function rotateSecret(appId) {
+        if (confirm('Are you sure you want to rotate the client secret? The old secret will stop working immediately.')) {
+            try {
+                const response = await fetch(\`/api/applications/\${appId}/rotate-secret\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(\`New client secret: \${data.clientSecret}\n\nSave this secret - it will not be shown again!\`);
+                    window.location.reload();
+                } else {
+                    alert('Failed to rotate secret');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function deleteApp(appId) {
+        if (confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
+            try {
+                const response = await fetch(\`/api/applications/\${appId}\`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/admin/applications';
+                } else {
+                    alert('Failed to delete application');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    // Edit application form
+    document.getElementById('editAppForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const appId = '<%= application.id %>';
+        const data = {
+            name: document.getElementById('appName').value,
+            type: document.getElementById('appType').value,
+            description: document.getElementById('appDescription').value
+        };
+
+        try {
+            const response = await fetch(\`/api/applications/\${appId}\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to update application');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred');
+        }
+    });
+
+    // OAuth2 configuration form
+    document.getElementById('oauth2ConfigForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const appId = '<%= application.id %>';
+        const grantTypes = [];
+        if (document.getElementById('grantAuthCode').checked) grantTypes.push('authorization_code');
+        if (document.getElementById('grantImplicit').checked) grantTypes.push('implicit');
+        if (document.getElementById('grantPassword').checked) grantTypes.push('password');
+        if (document.getElementById('grantClientCreds').checked) grantTypes.push('client_credentials');
+        if (document.getElementById('grantRefreshToken').checked) grantTypes.push('refresh_token');
+
+        const redirectUris = document.getElementById('redirectUris').value.split('\n').filter(u => u.trim());
+        const allowedScopes = document.getElementById('allowedScopes').value.split(' ').filter(s => s.trim());
+
+        const data = {
+            grantTypes,
+            redirectUris,
+            allowedScopes,
+            accessTokenLifetime: parseInt(document.getElementById('accessTokenLifetime').value),
+            refreshTokenLifetime: parseInt(document.getElementById('refreshTokenLifetime').value)
+        };
+
+        try {
+            const response = await fetch(\`/api/applications/\${appId}/oauth2\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('OAuth2 configuration saved successfully');
+            } else {
+                alert('Failed to save configuration');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred');
+        }
+    });
+
+    // SAML configuration form
+    document.getElementById('samlConfigForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const appId = '<%= application.id %>';
+        const data = {
+            samlEnabled: document.getElementById('samlEnabled').checked,
+            samlEntityId: document.getElementById('samlEntityId').value,
+            samlAcsUrl: document.getElementById('samlAcsUrl').value,
+            samlAudience: document.getElementById('samlAudience').value
+        };
+
+        try {
+            const response = await fetch(\`/api/applications/\${appId}/saml\`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('SAML configuration saved successfully');
+            } else {
+                alert('Failed to save configuration');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred');
+        }
+    });
+</script>
+`; %>
