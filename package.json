@@ -1,0 +1,18 @@
+{
+  "name": "exprsndns",
+  "version": "0.1.0",
+  "description": "Dynamic DNS service for the Exprsn network (.exprsn) with Exprsn-CA and Exprsn-Auth integration",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "bin": { "exprsndns": "bin/exprsndns.js" },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node bin/exprsndns.js",
+    "test": "node --test --test-reporter=spec 'test/*.test.js'"
+  },
+  "dependencies": {
+    "dns-packet": "^5.6.1",
+    "express": "^4.19.2"
+  },
+  "license": "MIT"
+}
