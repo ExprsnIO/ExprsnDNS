@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn CA</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --exprsn-primary: #667eea;
+            --exprsn-secondary: #764ba2;
+            --exprsn-success: #10b981;
+            --exprsn-warning: #f59e0b;
+            --exprsn-danger: #ef4444;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar for authenticated users */
+        <% if (typeof user !== 'undefined' && user) { %>
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar-brand:hover {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .sidebar-brand i {
+            margin-right: 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            font-weight: 600;
+        }
+
+        .sidebar .nav-item {
+            list-style: none;
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 3px solid white;
+            color: white;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-info {
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: auto;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .mobile-menu-toggle {
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 1001;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: var(--exprsn-primary);
+                color: white;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+        }
+        <% } else { %>
+        /* No sidebar for public pages */
+        .main-content {
+            min-height: 100vh;
+        }
+        <% } %>
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-body-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bs-tertiary-bg);
+        }
+
+        /* Cards */
+        .card {
+            border: 1px solid var(--bs-border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--bs-secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        /* Tables */
+        .table {
+            font-size: 0.875rem;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.35rem 0.65rem;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+
+        /* Public navbar for non-authenticated */
+        <% if (!user) { %>
+        .public-navbar {
+            background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .public-navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .public-navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .public-navbar-brand i {
+            margin-right: 0.75rem;
+        }
+
+        .public-navbar-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        <% } %>
+
+        /* Dark Mode Adjustments */
+        [data-bs-theme="dark"] .sidebar {
+            box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+        }
+
+        [data-bs-theme="dark"] .card:hover,
+        [data-bs-theme="dark"] .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <% if (typeof user !== 'undefined' && user) { %>
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle d-md-none" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Sidebar for authenticated users -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-brand">
+                    <i class="bi bi-shield-check"></i>
+                    Exprsn CA
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <ul class="p-0 m-0">
+                        <li class="nav-item">
+                            <a href="/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">
+                                <i class="bi bi-grid-3x3-gap"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/certificates" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'certificates' ? 'active' : '' %>">
+                                <i class="bi bi-file-earmark-lock"></i> Certificates
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/tokens" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'tokens' ? 'active' : '' %>">
+                                <i class="bi bi-key"></i> CA Tokens
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <ul class="p-0 m-0">
+                        <li class="nav-item">
+                            <a href="/users" class="nav-link">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/groups" class="nav-link">
+                                <i class="bi bi-collection"></i> Groups
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/roles" class="nav-link">
+                                <i class="bi bi-shield-lock"></i> Roles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/tickets" class="nav-link">
+                                <i class="bi bi-ticket-perforated"></i> Tickets
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Administration</div>
+                    <ul class="p-0 m-0">
+                        <li class="nav-item">
+                            <a href="/ca" class="nav-link">
+                                <i class="bi bi-gear"></i> CA Admin
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin" class="nav-link">
+                                <i class="bi bi-speedometer2"></i> Admin Dashboard
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="user-info">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar">
+                            <%= user.username.charAt(0).toUpperCase() %>
+                        </div>
+                        <div class="ms-2">
+                            <div class="small"><%= user.username %></div>
+                        </div>
+                    </div>
+                    <a href="/auth/logout" class="btn btn-sm btn-outline-light" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><%= title %></h1>
+                <div class="header-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                        <i class="bi bi-sun-fill" id="themeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="fade-in">
+                <%- body %>
+            </div>
+        </main>
+    <% } else { %>
+        <!-- Public navbar for non-authenticated users -->
+        <nav class="public-navbar">
+            <div class="container">
+                <a href="/" class="public-navbar-brand">
+                    <i class="bi bi-shield-check"></i>
+                    Exprsn CA
+                </a>
+                <div class="public-navbar-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                        <i class="bi bi-sun-fill" id="themeIcon"></i>
+                    </button>
+                    <a href="/auth/login" class="btn btn-light">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </a>
+                    <a href="/auth/register" class="btn btn-outline-light">
+                        <i class="bi bi-person-plus me-1"></i> Register
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content for public pages -->
+        <main class="container main-content">
+            <%- body %>
+        </main>
+    <% } %>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            const icon = document.getElementById('themeIcon');
+            icon.className = newTheme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = savedTheme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+            }
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar')?.classList.toggle('show');
+        }
+
+        // Close sidebar on outside click (mobile)
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+
+            if (window.innerWidth < 768 &&
+                sidebar?.classList.contains('show') &&
+                !sidebar.contains(e.target) &&
+                !toggle?.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Initialize
+        loadTheme();
+    </script>
+</body>
+</html>

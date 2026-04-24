@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      color: #007bff;
+      text-decoration: none;
+    }
+    h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: #007bff;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .unsubscribe {
+      font-size: 12px;
+      color: #999;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="{{appUrl}}" class="logo">{{appName}}</a>
+    </div>
+
+    <h1>Verify Your Email Address</h1>
+
+    <p>Hi {{displayName}},</p>
+
+    <p>Thank you for signing up for {{appName}}! To complete your registration and start using your account, please verify your email address by clicking the button below:</p>
+
+    <div style="text-align: center;">
+      <a href="{{verificationUrl}}" class="button">Verify Email Address</a>
+    </div>
+
+    <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+    <p style="word-break: break-all; color: #007bff;">{{verificationUrl}}</p>
+
+    <p>This verification link will expire in 24 hours for security reasons.</p>
+
+    <p>If you didn't create an account with {{appName}}, you can safely ignore this email.</p>
+
+    <div class="footer">
+      <p>Need help? Contact us at <a href="mailto:support@exprsn.io">support@exprsn.io</a></p>
+      <p><a href="{{appUrl}}">{{appName}}</a></p>
+      <p class="unsubscribe">This is an automated message. Please do not reply to this email.</p>
+    </div>
+  </div>
+</body>
+</html>

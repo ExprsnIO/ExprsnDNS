@@ -1,0 +1,27 @@
+Welcome to {{appName}}!
+
+Hi {{displayName}},
+
+We're excited to have you on board! Your account has been successfully created and you're ready to get started.
+
+Visit your dashboard: {{dashboardUrl}}
+
+What's Next?
+- Complete your profile: Add more information to personalize your experience
+- Enable two-factor authentication: Add an extra layer of security to your account
+- Explore features: Discover everything {{appName}} has to offer
+- Connect with others: Join groups and start building your network
+
+If you have any questions or need assistance, our support team is here to help. Just reply to this email or visit our help center.
+
+Your Account Details:
+- Email: {{email}}
+- Account Type: Standard
+
+Thank you for choosing {{appName}}. We look forward to serving you!
+
+---
+Need help? Contact us at support@exprsn.io
+{{appName}}: {{appUrl}}
+
+This is a transactional email. You're receiving this because you created an account with {{appName}}.

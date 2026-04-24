@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Dashboard - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .cert-type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .cert-type-root { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .cert-type-intermediate { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .cert-type-code_signing { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .cert-type-client { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+        .cert-type-server { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-revoked { background: #f8d7da; color: #721c24; }
+        .status-expired { background: #d6d8db; color: #383d41; }
+
+        .quick-action-card {
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .quick-action-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card {
+            border-left: 4px solid;
+        }
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cert-list-item {
+            transition: background 0.2s;
+        }
+        .cert-list-item:hover {
+            background: #f8f9fa;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .fingerprint {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container-fluid mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 mb-2">
+                    <i class="bi bi-shield-lock-fill text-primary"></i>
+                    Certificate Dashboard
+                </h1>
+                <p class="text-muted">Generate and manage X.509 certificates for the Exprsn ecosystem</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Certificates</h6>
+                                <h2 class="mb-0" id="statTotal">0</h2>
+                            </div>
+                            <div class="stat-icon text-primary">
+                                <i class="bi bi-file-earmark-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Active Certificates</h6>
+                                <h2 class="mb-0" id="statActive">0</h2>
+                            </div>
+                            <div class="stat-icon text-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-warning h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Expiring Soon</h6>
+                                <h2 class="mb-0" id="statExpiring">0</h2>
+                            </div>
+                            <div class="stat-icon text-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card border-danger h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Revoked</h6>
+                                <h2 class="mb-0" id="statRevoked">0</h2>
+                            </div>
+                            <div class="stat-icon text-danger">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#rootCertModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-shield-fill-check"></i>
+                        </div>
+                        <h5 class="mb-2">Generate Root CA</h5>
+                        <p class="text-muted mb-0">Create a new root certificate authority</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#intermediateCertModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                        <h5 class="mb-2">Generate Intermediate CA</h5>
+                        <p class="text-muted mb-0">Create an intermediate certificate authority</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card quick-action-card h-100" data-bs-toggle="modal" data-bs-target="#entityCertModal">
+                    <div class="card-body text-center p-4">
+                        <div class="quick-action-icon mb-3">
+                            <i class="bi bi-file-earmark-code-fill"></i>
+                        </div>
+                        <h5 class="mb-2">Generate Entity Certificate</h5>
+                        <p class="text-muted mb-0">Create client, server, or code signing certificates</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificate List -->
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul"></i>
+                            Certificates
+                        </h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="filterType">
+                                    <option value="">All Types</option>
+                                    <option value="root">Root CA</option>
+                                    <option value="intermediate">Intermediate CA</option>
+                                    <option value="code_signing">Code Signing</option>
+                                    <option value="client">Client</option>
+                                    <option value="server">Server</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="filterStatus">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="revoked">Revoked</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-sm btn-primary w-100" onclick="loadCertificates()">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Common Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Serial Number</th>
+                                <th>Valid Until</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="certificateList">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Root CA Modal -->
+    <div class="modal fade" id="rootCertModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-fill-check"></i>
+                        Generate Root CA Certificate
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="rootCertForm">
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Information</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Common Name (CN) *</label>
+                                <input type="text" class="form-control" name="commonName" value="Exprsn Root CA" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Organization (O) *</label>
+                                    <input type="text" class="form-control" name="organization" value="Exprsn" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Country (C) *</label>
+                                    <input type="text" class="form-control" name="country" value="US" maxlength="2" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">State/Province</label>
+                                    <input type="text" class="form-control" name="state" value="California">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Locality/City</label>
+                                    <input type="text" class="form-control" name="locality" value="San Francisco">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Parameters</h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Validity (Years) *</label>
+                                    <select class="form-select" name="validityYears" required>
+                                        <option value="5">5 Years</option>
+                                        <option value="10" selected>10 Years</option>
+                                        <option value="15">15 Years</option>
+                                        <option value="20">20 Years</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Key Size *</label>
+                                    <select class="form-select" name="keySize" required>
+                                        <option value="2048">2048 bits</option>
+                                        <option value="4096" selected>4096 bits (Recommended)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateRootCert()">
+                        <i class="bi bi-shield-fill-check"></i> Generate Root CA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intermediate CA Modal -->
+    <div class="modal fade" id="intermediateCertModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        Generate Intermediate CA Certificate
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="intermediateCertForm">
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Information</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Root CA Certificate *</label>
+                                <select class="form-select" name="rootCertificateId" id="rootCertSelect" required>
+                                    <option value="">Select Root CA...</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Common Name (CN) *</label>
+                                <input type="text" class="form-control" name="commonName" value="Exprsn Intermediate CA" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Organization (O) *</label>
+                                    <input type="text" class="form-control" name="organization" value="Exprsn" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Country (C) *</label>
+                                    <input type="text" class="form-control" name="country" value="US" maxlength="2" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Parameters</h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Validity (Years) *</label>
+                                    <select class="form-select" name="validityYears" required>
+                                        <option value="3">3 Years</option>
+                                        <option value="5" selected>5 Years</option>
+                                        <option value="10">10 Years</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Path Length</label>
+                                    <select class="form-select" name="pathLen">
+                                        <option value="0" selected>0 (End entities only)</option>
+                                        <option value="1">1 (One intermediate)</option>
+                                        <option value="2">2 (Two intermediates)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateIntermediateCert()">
+                        <i class="bi bi-diagram-3-fill"></i> Generate Intermediate CA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entity Certificate Modal -->
+    <div class="modal fade" id="entityCertModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-code-fill"></i>
+                        Generate Entity Certificate
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="entityCertForm">
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Type</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Certificate Type *</label>
+                                <select class="form-select" name="type" required>
+                                    <option value="client">Client Certificate</option>
+                                    <option value="server">Server Certificate</option>
+                                    <option value="code_signing">Code Signing Certificate</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Issuer Certificate *</label>
+                                <select class="form-select" name="issuerId" id="issuerSelect" required>
+                                    <option value="">Select Issuer...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Subject Information</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Common Name (CN) *</label>
+                                <input type="text" class="form-control" name="commonName" placeholder="example.com or User Name" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Organization (O)</label>
+                                    <input type="text" class="form-control" name="organization">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Subject Alternative Names (SANs)</label>
+                                <textarea class="form-control" name="subjectAltNames" rows="2"
+                                    placeholder="One per line: example.com, *.example.com, IP:192.168.1.1"></textarea>
+                                <small class="form-text text-muted">For server certificates, include all domain names and IPs</small>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="mb-3">Certificate Parameters</h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Validity (Days) *</label>
+                                    <select class="form-select" name="validityDays" required>
+                                        <option value="30">30 Days</option>
+                                        <option value="90">90 Days</option>
+                                        <option value="365" selected>1 Year</option>
+                                        <option value="730">2 Years</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Key Size *</label>
+                                    <select class="form-select" name="keySize" required>
+                                        <option value="2048" selected>2048 bits</option>
+                                        <option value="4096">4096 bits</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateEntityCert()">
+                        <i class="bi bi-file-earmark-code-fill"></i> Generate Certificate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Detail Modal -->
+    <div class="modal fade" id="certDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-text"></i>
+                        Certificate Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="certDetailContent">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/certificate-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-clock-history text-primary me-2"></i>
+            Active Sessions
+        </h5>
+        <div>
+            <button class="btn btn-warning" id="revokeAllBtn">
+                <i class="bi bi-x-circle"></i> Revoke All Sessions
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Search and Filter -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text"
+                           class="form-control"
+                           id="sessionSearch"
+                           placeholder="Search by username or IP address..."
+                           aria-label="Search sessions">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="typeFilter" aria-label="Filter by type">
+                    <option value="">All Types</option>
+                    <option value="web">Web Browser</option>
+                    <option value="mobile">Mobile App</option>
+                    <option value="api">API Client</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter" aria-label="Filter by status">
+                    <option value="active">Active</option>
+                    <option value="expired">Expired</option>
+                    <option value="all">All Status</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary"><%= stats.active %></h3>
+                        <small class="text-muted">Active Sessions</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-success"><%= stats.today %></h3>
+                        <small class="text-muted">Today's Logins</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning"><%= stats.expiringSoon %></h3>
+                        <small class="text-muted">Expiring Soon</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger"><%= stats.suspicious %></h3>
+                        <small class="text-muted">Suspicious Activity</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Table -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Device / Client</th>
+                        <th>IP Address</th>
+                        <th>Location</th>
+                        <th>Created</th>
+                        <th>Last Activity</th>
+                        <th>Expires</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (sessions && sessions.length > 0) { %>
+                        <% sessions.forEach(session => { %>
+                        <tr class="<%= session.suspicious ? 'table-warning' : '' %>">
+                            <td>
+                                <i class="bi bi-person-circle text-primary me-2"></i>
+                                <strong><%= session.User?.username || 'Unknown' %></strong>
+                                <% if (session.suspicious) { %>
+                                <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                                   title="Suspicious activity detected"></i>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (session.userAgent) { %>
+                                <small>
+                                    <% if (session.userAgent.includes('Mobile')) { %>
+                                    <i class="bi bi-phone"></i> Mobile
+                                    <% } else if (session.userAgent.includes('API')) { %>
+                                    <i class="bi bi-code"></i> API
+                                    <% } else { %>
+                                    <i class="bi bi-display"></i> Browser
+                                    <% } %>
+                                </small>
+                                <% } else { %>
+                                <small class="text-muted">Unknown</small>
+                                <% } %>
+                            </td>
+                            <td>
+                                <code class="small"><%= session.ipAddress %></code>
+                            </td>
+                            <td>
+                                <small class="text-muted"><%= session.location || 'Unknown' %></small>
+                            </td>
+                            <td>
+                                <small><%= new Date(session.createdAt).toLocaleString() %></small>
+                            </td>
+                            <td>
+                                <small><%= new Date(session.lastActivity).toLocaleString() %></small>
+                            </td>
+                            <td>
+                                <% if (session.expiresAt) { %>
+                                <% const now = Date.now(); %>
+                                <% const expiresAt = new Date(session.expiresAt).getTime(); %>
+                                <% if (expiresAt < now) { %>
+                                <span class="badge bg-danger">Expired</span>
+                                <% } else if (expiresAt - now < 3600000) { %>
+                                <span class="badge bg-warning text-dark">Soon</span>
+                                <% } else { %>
+                                <small><%= new Date(session.expiresAt).toLocaleString() %></small>
+                                <% } %>
+                                <% } else { %>
+                                <span class="badge bg-secondary">Never</span>
+                                <% } %>
+                            </td>
+                            <td class="table-actions">
+                                <button class="btn btn-sm btn-outline-danger"
+                                        data-action="revoke"
+                                        data-session-id="<%= session.id %>"
+                                        aria-label="Revoke session for <%= session.User?.username %>">
+                                    <i class="bi bi-x-circle"></i> Revoke
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No sessions found
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+        <nav aria-label="Session pagination">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <%= pagination.page === 1 ? 'disabled' : '' %>">
+                    <a class="page-link" href="?page=<%= pagination.page - 1 %>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %>
+
+                <li class="page-item <%= pagination.page === pagination.totalPages ? 'disabled' : '' %>">
+                    <a class="page-link" href="?page=<%= pagination.page + 1 %>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <p class="text-center text-muted">
+            Showing <%= (pagination.page - 1) * 20 + 1 %>-<%= Math.min(pagination.page * 20, pagination.total) %>
+            of <%= pagination.total %> sessions
+        </p>
+        <% } %>
+    </div>
+</div>
+
+<% locals.scripts = `
+<script>
+    // Session search
+    document.getElementById('sessionSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const user = row.cells[0]?.textContent.toLowerCase() || '';
+            const ip = row.cells[2]?.textContent.toLowerCase() || '';
+
+            if (user.includes(searchTerm) || ip.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Type filter
+    document.getElementById('typeFilter').addEventListener('change', function(e) {
+        const type = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const device = row.cells[1]?.textContent.toLowerCase() || '';
+
+            if (!type || device.includes(type)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Status filter
+    document.getElementById('statusFilter').addEventListener('change', function(e) {
+        const status = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const expires = row.cells[6]?.textContent.toLowerCase() || '';
+            const isExpired = expires.includes('expired');
+
+            if (status === 'all') {
+                row.style.display = '';
+            } else if (status === 'active' && !isExpired) {
+                row.style.display = '';
+            } else if (status === 'expired' && isExpired) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Revoke single session
+    document.querySelectorAll('[data-action="revoke"]').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const sessionId = this.dataset.sessionId;
+
+            if (confirm('Are you sure you want to revoke this session?')) {
+                try {
+                    const response = await fetch(\`/api/sessions/\${sessionId}/revoke\`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to revoke session. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            }
+        });
+    });
+
+    // Revoke all sessions
+    document.getElementById('revokeAllBtn').addEventListener('click', async function() {
+        if (confirm('Are you sure you want to revoke ALL active sessions? This will log out all users.')) {
+            try {
+                const response = await fetch('/api/sessions/revoke-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    alert('All sessions have been revoked.');
+                    window.location.reload();
+                } else {
+                    alert('Failed to revoke sessions. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+    });
+</script>
+`; %>

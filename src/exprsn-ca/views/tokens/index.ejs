@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-key"></i> <%= title %></h1>
+            <a href="/tokens/new" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Generate Token
+            </a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="btn-group mb-3" role="group">
+                    <a href="?status=all" class="btn btn-outline-primary <%= currentStatus === 'all' ? 'active' : '' %>">
+                        All (<%= counts.all %>)
+                    </a>
+                    <a href="?status=active" class="btn btn-outline-success <%= currentStatus === 'active' ? 'active' : '' %>">
+                        Active (<%= counts.active %>)
+                    </a>
+                    <a href="?status=expired" class="btn btn-outline-warning <%= currentStatus === 'expired' ? 'active' : '' %>">
+                        Expired (<%= counts.expired %>)
+                    </a>
+                    <a href="?status=revoked" class="btn btn-outline-danger <%= currentStatus === 'revoked' ? 'active' : '' %>">
+                        Revoked (<%= counts.revoked %>)
+                    </a>
+                </div>
+
+                <% if (tokens && tokens.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Resource</th>
+                                <th>Permissions</th>
+                                <th>Status</th>
+                                <th>Expiry</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tokensTableBody">
+                            <% tokens.forEach(token => { %>
+                            <tr data-token-id="<%= token.id %>">
+                                <td><code><%= token.id.substring(0, 16) %>...</code></td>
+                                <td>
+                                    <span class="badge bg-secondary"><%= token.resourceType %></span>
+                                    <br><small class="text-muted"><%= token.resourceValue.substring(0, 30) %>...</small>
+                                </td>
+                                <td>
+                                    <% ['read', 'write', 'append', 'delete', 'update'].forEach(perm => { %>
+                                        <% if (token[`permission${perm.charAt(0).toUpperCase() + perm.slice(1)}`]) { %>
+                                            <span class="badge bg-info"><%= perm %></span>
+                                        <% } %>
+                                    <% }) %>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<%= token.status === 'active' ? 'success' : token.status === 'expired' ? 'warning' : 'danger' %>">
+                                        <%= token.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <% if (token.expiryType === 'time' && token.expiresAt) { %>
+                                        <%= new Date(parseInt(token.expiresAt)).toLocaleDateString() %>
+                                    <% } else if (token.expiryType === 'use') { %>
+                                        <%= token.usesRemaining %>/<%= token.maxUses %> uses
+                                    <% } else { %>
+                                        Persistent
+                                    <% } %>
+                                </td>
+                                <td><%= new Date(token.createdAt).toLocaleDateString() %></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/tokens/<%= token.id %>" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <% if (token.status === 'active') { %>
+                                        <button class="btn btn-outline-danger" onclick="revokeToken('<%= token.id %>')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <% if (pagination && pagination.totalPages > 1) { %>
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= pagination.page === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?status=<%= currentStatus %>&page=<%= pagination.page - 1 %>">Previous</a>
+                        </li>
+                        <% for (let i = 1; i <= Math.min(pagination.totalPages, 10); i++) { %>
+                        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                            <a class="page-link" href="?status=<%= currentStatus %>&page=<%= i %>"><%= i %></a>
+                        </li>
+                        <% } %>
+                        <li class="page-item <%= pagination.page === pagination.totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?status=<%= currentStatus %>&page=<%= pagination.page + 1 %>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                <% } %>
+                <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-key display-1 text-muted"></i>
+                    <h3 class="mt-3">No Tokens Found</h3>
+                    <p class="text-muted">Generate your first token to get started</p>
+                    <a href="/tokens/new" class="btn btn-primary mt-2">
+                        <i class="bi bi-plus-circle"></i> Generate Token
+                    </a>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('token:created', (data) => {
+            location.reload();
+        });
+
+        socket.on('token:revoked', (data) => {
+            const row = document.querySelector(`tr[data-token-id="${data.tokenId}"]`);
+            if (row) {
+                const statusBadge = row.querySelector('td:nth-child(4) .badge');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-danger';
+                    statusBadge.textContent = 'revoked';
+                }
+            }
+        });
+
+        function revokeToken(tokenId) {
+            if (!confirm('Are you sure you want to revoke this token? This action cannot be undone.')) {
+                return;
+            }
+
+            fetch(`/api/tokens/${tokenId}/revoke`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to revoke token: ' + data.message);
+                }
+            })
+            .catch(err => {
+                alert('Error revoking token');
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>

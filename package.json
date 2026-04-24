@@ -1,0 +1,35 @@
+{
+  "name": "exprsn-dns-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Exprsn DNS monorepo - authoritative DNS, Certificate Authority, and Authentication services",
+  "workspaces": [
+    "src/shared",
+    "src/exprsn-ca",
+    "src/exprsn-auth",
+    "src/exprsn-dns"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces --include-workspace-root",
+    "start:dns": "npm --workspace @exprsn/dns run start",
+    "start:ca": "npm --workspace @exprsn/ca run start",
+    "start:auth": "npm --workspace @exprsn/auth run start",
+    "dev:dns": "npm --workspace @exprsn/dns run dev",
+    "dev:ca": "npm --workspace @exprsn/ca run dev",
+    "dev:auth": "npm --workspace @exprsn/auth run dev",
+    "migrate:dns": "npm --workspace @exprsn/dns run migrate",
+    "migrate:ca": "npm --workspace @exprsn/ca run migrate",
+    "migrate:auth": "npm --workspace @exprsn/auth run migrate",
+    "seed:dns": "npm --workspace @exprsn/dns run seed",
+    "setup:dns": "npm --workspace @exprsn/dns run setup",
+    "test": "npm run test --workspaces --if-present",
+    "test:dns": "npm --workspace @exprsn/dns test",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "author": "Rick Holland <engineering@exprsn.com>",
+  "license": "MIT"
+}

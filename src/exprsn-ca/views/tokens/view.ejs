@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn CA</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <main class="container mt-4">
+        <div class="d-flex align-items-center mb-4">
+            <a href="/tokens" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <h1><i class="bi bi-key"></i> Token Details</h1>
+        </div>
+
+        <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show">
+            <%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% } %>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Token Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Token ID:</strong></div>
+                            <div class="col-md-8"><code><%= token.id %></code></div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Status:</strong></div>
+                            <div class="col-md-8">
+                                <span class="badge bg-<%= token.status === 'active' ? 'success' : token.status === 'expired' ? 'warning' : 'danger' %>" id="tokenStatus">
+                                    <%= token.status %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Resource Type:</strong></div>
+                            <div class="col-md-8"><span class="badge bg-secondary"><%= token.resourceType %></span></div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Resource Value:</strong></div>
+                            <div class="col-md-8"><code><%= token.resourceValue %></code></div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Permissions:</strong></div>
+                            <div class="col-md-8">
+                                <% ['read', 'write', 'append', 'delete', 'update'].forEach(perm => { %>
+                                    <% const permField = `permission${perm.charAt(0).toUpperCase() + perm.slice(1)}`; %>
+                                    <% if (token[permField]) { %>
+                                        <span class="badge bg-info"><%= perm %></span>
+                                    <% } %>
+                                <% }) %>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Expiry Type:</strong></div>
+                            <div class="col-md-8"><%= token.expiryType %></div>
+                        </div>
+
+                        <% if (token.expiryType === 'time') { %>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Issued At:</strong></div>
+                            <div class="col-md-8"><%= new Date(parseInt(token.issuedAt || token.createdAt)).toLocaleString() %></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Not Before:</strong></div>
+                            <div class="col-md-8"><%= token.notBefore ? new Date(parseInt(token.notBefore)).toLocaleString() : 'N/A' %></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Expires At:</strong></div>
+                            <div class="col-md-8"><%= token.expiresAt ? new Date(parseInt(token.expiresAt)).toLocaleString() : 'N/A' %></div>
+                        </div>
+                        <% } else if (token.expiryType === 'use') { %>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Uses Remaining:</strong></div>
+                            <div class="col-md-8"><%= token.usesRemaining %> / <%= token.maxUses %></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Use Count:</strong></div>
+                            <div class="col-md-8"><%= token.useCount || 0 %></div>
+                        </div>
+                        <% } %>
+
+                        <% if (token.lastUsedAt) { %>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Last Used:</strong></div>
+                            <div class="col-md-8"><%= new Date(parseInt(token.lastUsedAt)).toLocaleString() %></div>
+                        </div>
+                        <% } %>
+
+                        <hr>
+
+                        <% if (token.certificate) { %>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Signed By:</strong></div>
+                            <div class="col-md-8">
+                                <a href="/certificates/<%= token.certificate.id %>">
+                                    <%= token.certificate.commonName %>
+                                </a>
+                                <span class="badge bg-<%= token.certificate.status === 'active' ? 'success' : 'danger' %> ms-2">
+                                    <%= token.certificate.status %>
+                                </span>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <% if (token.status === 'revoked' && token.revokedAt) { %>
+                        <hr>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Revoked At:</strong></div>
+                            <div class="col-md-8"><%= new Date(parseInt(token.revokedAt)).toLocaleString() %></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Revocation Reason:</strong></div>
+                            <div class="col-md-8"><%= token.revokedReason || 'Not specified' %></div>
+                        </div>
+                        <% } %>
+
+                        <% if (token.signature) { %>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Signature:</strong></label>
+                            <textarea class="form-control font-monospace" rows="4" readonly id="signature"><%= token.signature.substring(0, 200) %>...</textarea>
+                            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyToClipboard('signature')">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                        <% } %>
+
+                        <% if (token.checksum) { %>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Checksum (SHA-256):</strong></label>
+                            <input type="text" class="form-control font-monospace" value="<%= token.checksum %>" readonly id="checksum">
+                            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyToClipboard('checksum')">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-tools"></i> Actions</h5>
+                    </div>
+                    <div class="card-body d-grid gap-2">
+                        <% if (token.status === 'active') { %>
+                        <button class="btn btn-warning" onclick="testToken()">
+                            <i class="bi bi-play-circle"></i> Test Validation
+                        </button>
+
+                        <form action="/tokens/<%= token.id %>/revoke" method="POST" onsubmit="return confirm('Are you sure you want to revoke this token?');">
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bi bi-x-circle"></i> Revoke Token
+                            </button>
+                        </form>
+                        <% } %>
+
+                        <form action="/tokens/<%= token.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this token?');">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash"></i> Delete Token
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Usage History</h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (usageHistory && usageHistory.length > 0) { %>
+                        <div class="list-group list-group-flush">
+                            <% usageHistory.forEach(entry => { %>
+                            <div class="list-group-item px-0">
+                                <small class="text-muted"><%= new Date(entry.timestamp).toLocaleString() %></small>
+                                <br><%= entry.action %>
+                            </div>
+                            <% }) %>
+                        </div>
+                        <% } else { %>
+                        <p class="text-muted mb-0">No usage history available</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        const socket = io();
+        const tokenId = '<%= token.id %>';
+
+        socket.on('token:revoked', (data) => {
+            if (data.tokenId === tokenId) {
+                const statusBadge = document.getElementById('tokenStatus');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-danger';
+                    statusBadge.textContent = 'revoked';
+                }
+                location.reload();
+            }
+        });
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => btn.innerHTML = originalText, 2000);
+        }
+
+        async function testToken() {
+            // TODO: Implement token validation test
+            alert('Token validation test - Coming soon!');
+        }
+    </script>
+</body>
+</html>

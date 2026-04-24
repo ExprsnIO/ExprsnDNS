@@ -1,0 +1,899 @@
+<!-- Operation Cards -->
+<div class="row g-4 mb-4">
+    <!-- Issue Certificate -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card operation-card h-100" data-bs-toggle="modal" data-bs-target="#issueCertModal" role="button" tabindex="0">
+            <div class="card-body text-center p-4">
+                <div class="operation-icon mb-3">
+                    <i class="bi bi-file-earmark-lock"></i>
+                </div>
+                <h4 class="mb-2">Issue Certificate</h4>
+                <p class="text-muted mb-0">Generate new root, intermediate, or end-entity certificates</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Token -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card operation-card h-100" data-bs-toggle="modal" data-bs-target="#generateTokenModal" role="button" tabindex="0">
+            <div class="card-body text-center p-4">
+                <div class="operation-icon mb-3">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h4 class="mb-2">Generate Token</h4>
+                <p class="text-muted mb-0">Create CA tokens with fine-grained permissions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card operation-card h-100" data-bs-toggle="modal" data-bs-target="#configModal" role="button" tabindex="0">
+            <div class="card-body text-center p-4">
+                <div class="operation-icon mb-3">
+                    <i class="bi bi-sliders"></i>
+                </div>
+                <h4 class="mb-2">Configuration</h4>
+                <p class="text-muted mb-0">Edit system configuration and environment variables</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- OCSP & CRL Status -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    OCSP Status
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshOCSPStatus()" title="Refresh OCSP Status">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+            <div class="card-body" id="ocspStatus">
+                <div class="d-flex justify-content-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-list-check text-info me-2"></i>
+                    CRL Status
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="generateCRL()" title="Generate CRL">
+                    <i class="bi bi-arrow-repeat"></i>
+                </button>
+            </div>
+            <div class="card-body" id="crlStatus">
+                <div class="d-flex justify-content-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Management -->
+<div class="card mb-4">
+    <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            Certificate Management
+        </h6>
+        <div class="d-flex gap-2">
+            <select class="form-select form-select-sm" id="certStatusFilter" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="revoked">Revoked</option>
+                <option value="expired">Expired</option>
+            </select>
+            <select class="form-select form-select-sm" id="certTypeFilter" style="width: auto;">
+                <option value="">All Types</option>
+                <option value="root">Root</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="end-entity">End Entity</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="certificateList">
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Token Management -->
+<div class="card">
+    <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="bi bi-key me-2"></i>
+            Token Management
+        </h6>
+        <select class="form-select form-select-sm" id="tokenStatusFilter" style="width: auto;">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="revoked">Revoked</option>
+            <option value="expired">Expired</option>
+        </select>
+    </div>
+    <div class="card-body">
+        <div id="tokenList">
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Issue Certificate Modal -->
+<div class="modal fade" id="issueCertModal" tabindex="-1" aria-labelledby="issueCertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="issueCertModalLabel">
+                    <i class="bi bi-file-earmark-lock text-primary me-2"></i>
+                    Issue Certificate
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="issueCertForm">
+                <div class="modal-body">
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Certificate Type</h6>
+                        <select class="form-select" id="certType" name="type" required>
+                            <option value="">Select certificate type...</option>
+                            <option value="root">Root CA Certificate</option>
+                            <option value="intermediate">Intermediate CA Certificate</option>
+                            <option value="end-entity">End-Entity Certificate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Subject Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="certCommonName">Common Name (CN) *</label>
+                                <input type="text" class="form-control" id="certCommonName" name="commonName" required
+                                       placeholder="example.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certOrganization">Organization (O)</label>
+                                <input type="text" class="form-control" id="certOrganization" name="organization"
+                                       placeholder="Acme Corporation">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certCountry">Country (C)</label>
+                                <input type="text" class="form-control" id="certCountry" name="country" maxlength="2"
+                                       placeholder="US">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certState">State/Province (ST)</label>
+                                <input type="text" class="form-control" id="certState" name="state"
+                                       placeholder="California">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certLocality">Locality (L)</label>
+                                <input type="text" class="form-control" id="certLocality" name="locality"
+                                       placeholder="San Francisco">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certEmail">Email Address</label>
+                                <input type="email" class="form-control" id="certEmail" name="email"
+                                       placeholder="admin@example.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Certificate Options</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="certKeySize">Key Size (bits)</label>
+                                <select class="form-select" id="certKeySize" name="keySize">
+                                    <option value="2048">2048 (Recommended)</option>
+                                    <option value="3072">3072</option>
+                                    <option value="4096">4096 (High Security)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="certValidity">Validity Period (days)</label>
+                                <input type="number" class="form-control" id="certValidity" name="validityDays" value="365" min="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Issue Certificate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Token Modal -->
+<div class="modal fade" id="generateTokenModal" tabindex="-1" aria-labelledby="generateTokenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateTokenModalLabel">
+                    <i class="bi bi-shield-lock text-success me-2"></i>
+                    Generate CA Token
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="generateTokenForm">
+                <div class="modal-body">
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Certificate</h6>
+                        <select class="form-select" id="tokenCertSelect" name="certificateId" required>
+                            <option value="">Loading certificates...</option>
+                        </select>
+                        <small class="form-text text-muted">Select the certificate to sign this token</small>
+                    </div>
+
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Resource</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="tokenResourceType">Resource Type *</label>
+                                <select class="form-select" id="tokenResourceType" name="resourceType" required>
+                                    <option value="url">URL</option>
+                                    <option value="did">DID</option>
+                                    <option value="cid">CID</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label" for="tokenResourceValue">Resource Value *</label>
+                                <input type="text" class="form-control" id="tokenResourceValue" name="resourceValue" required
+                                       placeholder="https://api.example.com/*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Permissions</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permRead" name="read" checked>
+                                    <label class="form-check-label" for="permRead">Read</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permWrite" name="write">
+                                    <label class="form-check-label" for="permWrite">Write</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permAppend" name="append">
+                                    <label class="form-check-label" for="permAppend">Append</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="permDelete" name="delete">
+                                    <label class="form-check-label" for="permDelete">Delete</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-3">
+                        <h6 class="mb-3">Expiry</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="expiryType">Expiry Type *</label>
+                                <select class="form-select" id="expiryType" name="expiryType" required>
+                                    <option value="time">Time-based</option>
+                                    <option value="use">Use-based</option>
+                                    <option value="persistent">Persistent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8" id="expiryValueGroup">
+                                <label class="form-label" id="expiryValueLabel" for="expiryValue">Expires In (seconds)</label>
+                                <input type="number" class="form-control" id="expiryValue" name="expiryValue" value="3600" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tokenResult" class="alert alert-success" style="display: none;" role="alert">
+                        <h6 class="alert-heading">Token Generated Successfully!</h6>
+                        <p class="mb-2">Token ID: <code id="generatedTokenId"></code></p>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="copyToken()">
+                            <i class="bi bi-clipboard me-1"></i>
+                            Copy Token ID
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-key me-2"></i>
+                        Generate Token
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration Modal -->
+<div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configModalLabel">
+                    <i class="bi bi-sliders text-warning me-2"></i>
+                    System Configuration
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning border-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> Changes require service restart to take effect. Backup your configuration before making changes.
+                </div>
+
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="env-tab" data-bs-toggle="tab" data-bs-target="#envTab" type="button" role="tab" aria-controls="envTab" aria-selected="true">
+                            Environment Variables
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ca-config-tab" data-bs-toggle="tab" data-bs-target="#caConfigTab" type="button" role="tab" aria-controls="caConfigTab" aria-selected="false">
+                            CA Settings
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="envTab" role="tabpanel" aria-labelledby="env-tab">
+                        <form id="configForm">
+                            <textarea class="form-control code-editor" id="envContent" rows="20"
+                                      placeholder="Loading configuration..." aria-label="Environment configuration"></textarea>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-2"></i>
+                                    Save Configuration
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="loadConfig()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>
+                                    Reload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="caConfigTab" role="tabpanel" aria-labelledby="ca-config-tab">
+                        <div id="caConfigContent">
+                            <div class="d-flex justify-content-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .operation-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid var(--bs-border-color);
+    }
+
+    .operation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-color: var(--exprsn-primary);
+    }
+
+    .operation-card:focus {
+        outline: 2px solid var(--exprsn-primary);
+        outline-offset: 2px;
+    }
+
+    .operation-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--exprsn-primary) 0%, var(--exprsn-secondary) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: var(--bs-light);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--exprsn-primary);
+    }
+
+    [data-bs-theme="dark"] .form-section {
+        background: var(--bs-dark);
+    }
+
+    .code-editor {
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .modal-dialog-scrollable .modal-body {
+        overflow-y: auto;
+    }
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadOCSPStatus();
+        loadCRLStatus();
+        loadCertificates();
+        loadTokens();
+        loadActiveCertificatesForToken();
+
+        // Filter handlers
+        document.getElementById('certStatusFilter').addEventListener('change', loadCertificates);
+        document.getElementById('certTypeFilter').addEventListener('change', loadCertificates);
+        document.getElementById('tokenStatusFilter').addEventListener('change', loadTokens);
+
+        // Expiry type change handler
+        document.getElementById('expiryType').addEventListener('change', function() {
+            const expiryValueGroup = document.getElementById('expiryValueGroup');
+            const expiryValueLabel = document.getElementById('expiryValueLabel');
+            const expiryValue = document.getElementById('expiryValue');
+
+            if (this.value === 'use') {
+                expiryValueLabel.textContent = 'Max Uses';
+                expiryValue.value = '1';
+                expiryValueGroup.style.display = 'block';
+            } else if (this.value === 'time') {
+                expiryValueLabel.textContent = 'Expires In (seconds)';
+                expiryValue.value = '3600';
+                expiryValueGroup.style.display = 'block';
+            } else {
+                expiryValueGroup.style.display = 'none';
+            }
+        });
+
+        // Load config when modal opens
+        document.getElementById('configModal').addEventListener('show.bs.modal', loadConfig);
+
+        // Keyboard accessibility for operation cards
+        document.querySelectorAll('.operation-card').forEach(card => {
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+
+    // Issue Certificate Form
+    document.getElementById('issueCertForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Issuing...';
+
+        try {
+            const response = await fetch('/admin/api/certificates/issue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('issueCertModal'));
+                modal.hide();
+                this.reset();
+                loadCertificates();
+                showToast('Success', 'Certificate issued successfully!', 'success');
+            } else {
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to issue certificate: ' + error.message, 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    // Generate Token Form
+    document.getElementById('generateTokenForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            certificateId: formData.get('certificateId'),
+            resourceType: formData.get('resourceType'),
+            resourceValue: formData.get('resourceValue'),
+            permissions: {
+                read: formData.get('read') === 'on',
+                write: formData.get('write') === 'on',
+                append: formData.get('append') === 'on',
+                delete: formData.get('delete') === 'on'
+            },
+            expiryType: formData.get('expiryType'),
+            expiryValue: parseInt(formData.get('expiryValue'))
+        };
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+
+        try {
+            const response = await fetch('/admin/api/tokens/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById('generatedTokenId').textContent = result.token.id;
+                document.getElementById('tokenResult').style.display = 'block';
+                loadTokens();
+                showToast('Success', 'Token generated successfully!', 'success');
+            } else {
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to generate token: ' + error.message, 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    // Save Configuration Form
+    document.getElementById('configForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const envContent = document.getElementById('envContent').value;
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+        try {
+            const response = await fetch('/admin/api/config/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ envContent })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showToast('Success', result.message, 'success');
+            } else {
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to update configuration: ' + error.message, 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    // Load Functions
+    async function loadOCSPStatus() {
+        try {
+            const response = await fetch('/admin/api/ocsp/status');
+            const status = await response.json();
+            document.getElementById('ocspStatus').innerHTML = `
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-${status.enabled ? 'success' : 'secondary'}">
+                            ${status.enabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                        <span class="badge bg-${status.healthy ? 'success' : 'danger'} ms-2">
+                            ${status.healthy ? 'Healthy' : 'Unhealthy'}
+                        </span>
+                    </dd>
+                    <dt class="col-sm-4">URL:</dt>
+                    <dd class="col-sm-8"><code>${escapeHtml(status.url || 'N/A')}</code></dd>
+                    <dt class="col-sm-4">Port:</dt>
+                    <dd class="col-sm-8">${status.port || 'N/A'}</dd>
+                </dl>
+            `;
+        } catch (error) {
+            document.getElementById('ocspStatus').innerHTML = '<p class="text-danger small mb-0">Failed to load status</p>';
+        }
+    }
+
+    async function loadCRLStatus() {
+        try {
+            const response = await fetch('/admin/api/crl/status');
+            const status = await response.json();
+            document.getElementById('crlStatus').innerHTML = `
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-${status.enabled ? 'success' : 'secondary'}">
+                            ${status.enabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                    </dd>
+                    <dt class="col-sm-4">Last Generated:</dt>
+                    <dd class="col-sm-8">${status.lastGenerated ? new Date(status.lastGenerated).toLocaleString() : 'Never'}</dd>
+                    <dt class="col-sm-4">Revoked Certs:</dt>
+                    <dd class="col-sm-8">${status.revokedCount}</dd>
+                </dl>
+            `;
+        } catch (error) {
+            document.getElementById('crlStatus').innerHTML = '<p class="text-danger small mb-0">Failed to load status</p>';
+        }
+    }
+
+    async function loadCertificates() {
+        const status = document.getElementById('certStatusFilter').value;
+        const type = document.getElementById('certTypeFilter').value;
+
+        try {
+            const response = await fetch(`/admin/api/certificates?status=${status}&type=${type}&limit=20`);
+            const data = await response.json();
+
+            if (data.certificates.length === 0) {
+                document.getElementById('certificateList').innerHTML = '<p class="text-muted text-center">No certificates found</p>';
+                return;
+            }
+
+            document.getElementById('certificateList').innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Common Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Valid Until</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.certificates.map(cert => `
+                                <tr>
+                                    <td><strong>${escapeHtml(cert.commonName)}</strong></td>
+                                    <td><span class="badge bg-info">${cert.certificateType}</span></td>
+                                    <td><span class="badge bg-${cert.status === 'active' ? 'success' : 'danger'}">${cert.status}</span></td>
+                                    <td>${new Date(cert.notAfter).toLocaleDateString()}</td>
+                                    <td>
+                                        <a href="/admin/api/certificates/${cert.id}/download" class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        ${cert.status === 'active' ? `
+                                            <button onclick="revokeCert('${cert.id}')" class="btn btn-sm btn-outline-danger" title="Revoke">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        ` : ''}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('certificateList').innerHTML = '<p class="text-danger">Failed to load certificates</p>';
+        }
+    }
+
+    async function loadTokens() {
+        const status = document.getElementById('tokenStatusFilter').value;
+
+        try {
+            const response = await fetch(`/admin/api/tokens?status=${status}&limit=20`);
+            const data = await response.json();
+
+            if (data.tokens.length === 0) {
+                document.getElementById('tokenList').innerHTML = '<p class="text-muted text-center">No tokens found</p>';
+                return;
+            }
+
+            document.getElementById('tokenList').innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Token ID</th>
+                                <th>Resource</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.tokens.map(token => `
+                                <tr>
+                                    <td><code>${token.id.substring(0, 8)}...</code></td>
+                                    <td><small>${escapeHtml(token.resourceValue.substring(0, 40))}...</small></td>
+                                    <td><span class="badge bg-secondary">${token.expiryType}</span></td>
+                                    <td><span class="badge bg-${token.status === 'active' ? 'success' : 'danger'}">${token.status}</span></td>
+                                    <td>
+                                        ${token.status === 'active' ? `
+                                            <button onclick="revokeToken('${token.id}')" class="btn btn-sm btn-outline-danger" title="Revoke">
+                                                <i class="bi bi-x-circle"></i> Revoke
+                                            </button>
+                                        ` : ''}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('tokenList').innerHTML = '<p class="text-danger">Failed to load tokens</p>';
+        }
+    }
+
+    async function loadActiveCertificatesForToken() {
+        try {
+            const response = await fetch('/admin/api/certificates?status=active&limit=100');
+            const data = await response.json();
+
+            const select = document.getElementById('tokenCertSelect');
+            select.innerHTML = '<option value="">Select a certificate...</option>' +
+                data.certificates.map(cert =>
+                    `<option value="${cert.id}">${escapeHtml(cert.commonName)} (${cert.certificateType})</option>`
+                ).join('');
+        } catch (error) {
+            console.error('Failed to load certificates:', error);
+        }
+    }
+
+    async function loadConfig() {
+        try {
+            const response = await fetch('/admin/api/config');
+            const config = await response.json();
+            document.getElementById('envContent').value = config.envContent;
+
+            document.getElementById('caConfigContent').innerHTML = `
+                <dl class="row">
+                    <dt class="col-sm-3">Environment:</dt>
+                    <dd class="col-sm-9">${config.app.env}</dd>
+                    <dt class="col-sm-3">Port:</dt>
+                    <dd class="col-sm-9">${config.app.port}</dd>
+                    <dt class="col-sm-3">CA Name:</dt>
+                    <dd class="col-sm-9">${config.ca.name}</dd>
+                    <dt class="col-sm-3">Organization:</dt>
+                    <dd class="col-sm-9">${config.ca.organization}</dd>
+                    <dt class="col-sm-3">Storage Type:</dt>
+                    <dd class="col-sm-9">${config.storage.type}</dd>
+                </dl>
+            `;
+        } catch (error) {
+            showToast('Error', 'Failed to load configuration: ' + error.message, 'danger');
+        }
+    }
+
+    async function revokeCert(id) {
+        if (!confirm('Are you sure you want to revoke this certificate?')) return;
+
+        const reason = prompt('Revocation reason (optional):');
+
+        try {
+            const response = await fetch(`/admin/api/certificates/${id}/revoke`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+
+            if (response.ok) {
+                loadCertificates();
+                showToast('Success', 'Certificate revoked successfully', 'success');
+            } else {
+                const result = await response.json();
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to revoke certificate: ' + error.message, 'danger');
+        }
+    }
+
+    async function revokeToken(id) {
+        if (!confirm('Are you sure you want to revoke this token?')) return;
+
+        try {
+            const response = await fetch(`/admin/api/tokens/${id}/revoke`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                loadTokens();
+                showToast('Success', 'Token revoked successfully', 'success');
+            } else {
+                const result = await response.json();
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to revoke token: ' + error.message, 'danger');
+        }
+    }
+
+    async function generateCRL() {
+        if (!confirm('Generate a new Certificate Revocation List?')) return;
+
+        try {
+            const response = await fetch('/admin/api/crl/generate', {
+                method: 'POST'
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                loadCRLStatus();
+                showToast('Success', result.message, 'success');
+            } else {
+                showToast('Error', result.error, 'danger');
+            }
+        } catch (error) {
+            showToast('Error', 'Failed to generate CRL: ' + error.message, 'danger');
+        }
+    }
+
+    function refreshOCSPStatus() {
+        loadOCSPStatus();
+    }
+
+    function copyToken() {
+        const tokenId = document.getElementById('generatedTokenId').textContent;
+        navigator.clipboard.writeText(tokenId);
+        showToast('Success', 'Token ID copied to clipboard!', 'success');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showToast(title, message, type) {
+        // Simple toast implementation - could be enhanced with Bootstrap Toast component
+        alert(`${title}: ${message}`);
+    }
+</script>

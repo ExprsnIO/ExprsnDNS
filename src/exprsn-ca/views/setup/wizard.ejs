@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .setup-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .setup-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .setup-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .setup-header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .setup-header p {
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+    }
+
+    .setup-body {
+      padding: 2rem;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e9ecef;
+      z-index: 0;
+    }
+
+    .step-indicator-item {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-indicator-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e9ecef;
+      color: #6c757d;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .step-indicator-item.active .step-indicator-circle {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .step-indicator-item.completed .step-indicator-circle {
+      background: #28a745;
+      color: white;
+    }
+
+    .step-indicator-label {
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+
+    .step-indicator-item.active .step-indicator-label {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .setup-step {
+      display: none;
+    }
+
+    .setup-step.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+    }
+
+    .test-result {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+
+    .test-result.success {
+      background: #d1e7dd;
+      color: #0f5132;
+      border: 1px solid #badbcc;
+    }
+
+    .test-result.error {
+      background: #f8d7da;
+      color: #842029;
+      border: 1px solid #f5c2c7;
+    }
+
+    .alert-info {
+      background: #cfe2ff;
+      border-color: #b6d4fe;
+      color: #084298;
+    }
+
+    .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+      border-width: 0.15rem;
+    }
+
+    .template-group {
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .template-group .btn-remove {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+
+    .progress-summary {
+      background: #f8f9fa;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+
+    .progress-summary h5 {
+      margin-bottom: 1rem;
+    }
+
+    .progress-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .progress-item:last-child {
+      border-bottom: none;
+    }
+
+    .progress-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 1rem;
+    }
+
+    .setup-footer {
+      background: #f8f9fa;
+      padding: 1.5rem 2rem;
+      border-top: 1px solid #dee2e6;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .setup-container {
+        padding: 1rem;
+      }
+
+      .setup-card {
+        border-radius: 0.5rem;
+      }
+
+      .setup-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .step-indicator {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .step-indicator-item {
+        flex: 0 0 calc(25% - 0.5rem);
+      }
+
+      .step-indicator-label {
+        font-size: 0.7rem;
+      }
+
+      .setup-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .setup-footer button {
+        width: 100%;
+      }
+    }
+
+    /* Enhanced button styles */
+    .btn {
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Loading state */
+    .btn .spinner-border-sm {
+      width: 1rem;
+      height: 1rem;
+      border-width: 0.15em;
+    }
+
+    /* Test result animations */
+    .test-result {
+      animation: slideDown 0.3s ease-out;
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .test-result.success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left: 4px solid #10b981;
+    }
+
+    .test-result.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+
+    /* Focus states for accessibility */
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--exprsn-primary);
+      box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* Card hover effect for service selection */
+    .card {
+      transition: all 0.2s ease;
+    }
+
+    .card:has(input:checked) {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+      border-color: var(--exprsn-primary);
+    }
+
+    /* Progress bar animation */
+    .progress-bar-animated {
+      animation: progress-bar-stripes 1s linear infinite;
+    }
+
+    /* Keyboard shortcuts styling */
+    kbd {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.375rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="setup-container">
+    <div class="setup-card">
+      <div class="setup-header">
+        <h1><i class="bi bi-gear-fill"></i> Exprsn CA Setup Wizard</h1>
+        <p>First-time configuration for your Certificate Authority system</p>
+      </div>
+
+      <div class="setup-body">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+          <div class="step-indicator-item active" data-step="1">
+            <div class="step-indicator-circle">1</div>
+            <div class="step-indicator-label">Welcome</div>
+          </div>
+          <div class="step-indicator-item" data-step="2">
+            <div class="step-indicator-circle">2</div>
+            <div class="step-indicator-label">Database</div>
+          </div>
+          <div class="step-indicator-item" data-step="3">
+            <div class="step-indicator-circle">3</div>
+            <div class="step-indicator-label">CA Settings</div>
+          </div>
+          <div class="step-indicator-item" data-step="4">
+            <div class="step-indicator-circle">4</div>
+            <div class="step-indicator-label">Admin User</div>
+          </div>
+          <div class="step-indicator-item" data-step="5">
+            <div class="step-indicator-circle">5</div>
+            <div class="step-indicator-label">Services</div>
+          </div>
+          <div class="step-indicator-item" data-step="6">
+            <div class="step-indicator-circle">6</div>
+            <div class="step-indicator-label">Advanced</div>
+          </div>
+          <div class="step-indicator-item" data-step="7">
+            <div class="step-indicator-circle">7</div>
+            <div class="step-indicator-label">Review</div>
+          </div>
+        </div>
+
+        <!-- Step 1: Welcome -->
+        <div class="setup-step active" data-step="1">
+          <h3 class="mb-4">Welcome to Exprsn Certificate Authority</h3>
+
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>First-Time Setup Required</strong><br>
+            This wizard will guide you through the initial configuration of your Certificate Authority system.
+            The process includes:
+          </div>
+
+          <ul class="list-group mb-4">
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> Database configuration</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> Certificate Authority settings</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> Root certificate generation</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> Administrator account creation</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> Default groups and roles setup</li>
+            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success"></i> System configuration</li>
+          </ul>
+
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Important:</strong> This wizard should only be run once. After completion, you'll need to reconfigure
+            manually if changes are needed. Make sure you have all necessary information ready before proceeding.
+          </div>
+        </div>
+
+        <!-- Step 2: Database Configuration -->
+        <div class="setup-step" data-step="2">
+          <h3 class="mb-4">Database Configuration</h3>
+
+          <div class="alert alert-info">
+            Configure your PostgreSQL database connection. Make sure the database exists and the user has appropriate permissions.
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <label for="db-host" class="form-label">Database Host</label>
+              <input type="text" class="form-control" id="db-host" value="localhost" required>
+            </div>
+            <div class="col-md-4">
+              <label for="db-port" class="form-label">Port</label>
+              <input type="number" class="form-control" id="db-port" value="5432" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="db-name" class="form-label">Database Name</label>
+            <input type="text" class="form-control" id="db-name" value="exprsn_ca" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="db-username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="db-username" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="db-password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="db-password">
+            <div class="form-text">Leave blank if no password is required</div>
+          </div>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="db-ssl">
+            <label class="form-check-label" for="db-ssl">
+              Use SSL/TLS for database connection
+            </label>
+          </div>
+
+          <hr class="my-3">
+
+          <h5>Database Pooling</h5>
+          <p class="text-muted small">Configure connection pool settings for optimal performance</p>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="db-pool-min" class="form-label">Minimum Connections</label>
+              <input type="number" class="form-control" id="db-pool-min" value="2" min="1" max="10">
+              <div class="form-text">Min connections kept alive</div>
+            </div>
+            <div class="col-md-6">
+              <label for="db-pool-max" class="form-label">Maximum Connections</label>
+              <input type="number" class="form-control" id="db-pool-max" value="10" min="5" max="100">
+              <div class="form-text">Max concurrent connections</div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="db-pool-idle" class="form-label">Idle Timeout (ms)</label>
+              <input type="number" class="form-control" id="db-pool-idle" value="10000" min="1000" step="1000">
+              <div class="form-text">Time before idle connection is closed</div>
+            </div>
+            <div class="col-md-6">
+              <label for="db-pool-acquire" class="form-label">Acquire Timeout (ms)</label>
+              <input type="number" class="form-control" id="db-pool-acquire" value="30000" min="5000" step="1000">
+              <div class="form-text">Time to wait for connection</div>
+            </div>
+          </div>
+
+          <hr class="my-3">
+
+          <h5>Database Schema Setup</h5>
+          <p class="text-muted small">Upload and apply the CA database schema (DDL)</p>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="db-apply-ddl" checked>
+            <label class="form-check-label" for="db-apply-ddl">
+              Automatically apply database schema after connection test
+            </label>
+            <div class="form-text">The system will upload database/schema.sql to your PostgreSQL database</div>
+          </div>
+
+          <button type="button" class="btn btn-outline-primary" id="test-db-btn">
+            <i class="bi bi-plug"></i> Test Connection
+          </button>
+          <button type="button" class="btn btn-outline-success" id="upload-ddl-btn" style="display: none;">
+            <i class="bi bi-upload"></i> Upload Schema (DDL)
+          </button>
+          <div id="db-test-result"></div>
+
+          <hr class="my-4">
+
+          <h5>Redis Cache (Optional)</h5>
+          <p class="text-muted">Redis caching improves performance but is not required.</p>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="redis-enabled">
+            <label class="form-check-label" for="redis-enabled">
+              Enable Redis caching
+            </label>
+          </div>
+
+          <div id="redis-config" style="display: none;">
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label for="redis-host" class="form-label">Redis Host</label>
+                <input type="text" class="form-control" id="redis-host" value="localhost">
+              </div>
+              <div class="col-md-4">
+                <label for="redis-port" class="form-label">Port</label>
+                <input type="number" class="form-control" id="redis-port" value="6379">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="redis-password" class="form-label">Password (Optional)</label>
+              <input type="password" class="form-control" id="redis-password">
+            </div>
+
+            <div class="mb-3">
+              <label for="redis-db" class="form-label">Database Number</label>
+              <input type="number" class="form-control" id="redis-db" value="0" min="0" max="15">
+            </div>
+
+            <button type="button" class="btn btn-outline-primary" id="test-redis-btn">
+              <i class="bi bi-plug"></i> Test Connection
+            </button>
+            <div id="redis-test-result"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: CA Settings -->
+        <div class="setup-step" data-step="3">
+          <h3 class="mb-4">Certificate Authority Settings</h3>
+
+          <div class="alert alert-info">
+            Configure your Certificate Authority identity. These settings will be embedded in all certificates issued by your CA.
+          </div>
+
+          <div class="mb-3">
+            <label for="ca-name" class="form-label">CA Name</label>
+            <input type="text" class="form-control" id="ca-name" placeholder="My Certificate Authority" required>
+            <div class="form-text">The common name for your Certificate Authority</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="ca-domain" class="form-label">CA Domain</label>
+            <input type="text" class="form-control" id="ca-domain" placeholder="ca.example.com" required>
+            <div class="form-text">The domain where this CA will be accessible</div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="ca-organization" class="form-label">Organization</label>
+              <input type="text" class="form-control" id="ca-organization" placeholder="My Company Inc." required>
+            </div>
+            <div class="col-md-6">
+              <label for="ca-org-unit" class="form-label">Organizational Unit</label>
+              <input type="text" class="form-control" id="ca-org-unit" value="Certificate Authority">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="ca-country" class="form-label">Country Code</label>
+              <input type="text" class="form-control" id="ca-country" placeholder="US" maxlength="2" required>
+              <div class="form-text">2-letter ISO code</div>
+            </div>
+            <div class="col-md-4">
+              <label for="ca-state" class="form-label">State/Province</label>
+              <input type="text" class="form-control" id="ca-state" placeholder="California">
+            </div>
+            <div class="col-md-4">
+              <label for="ca-locality" class="form-label">City/Locality</label>
+              <input type="text" class="form-control" id="ca-locality" placeholder="San Francisco">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="ca-email" class="form-label">CA Email</label>
+            <input type="email" class="form-control" id="ca-email" placeholder="ca@example.com" required>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Certificate Settings</h5>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="ca-create-intermediate" checked>
+            <label class="form-check-label" for="ca-create-intermediate">
+              Create Intermediate CA Certificate
+            </label>
+            <div class="form-text">Recommended for production use. Intermediate certificates provide better security.</div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="ca-root-key-size" class="form-label">Root Key Size</label>
+              <select class="form-select" id="ca-root-key-size">
+                <option value="4096" selected>4096 bits (Recommended)</option>
+                <option value="2048">2048 bits</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="ca-intermediate-key-size" class="form-label">Intermediate Key Size</label>
+              <select class="form-select" id="ca-intermediate-key-size">
+                <option value="4096" selected>4096 bits (Recommended)</option>
+                <option value="2048">2048 bits</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="ca-entity-key-size" class="form-label">Entity Key Size</label>
+              <select class="form-select" id="ca-entity-key-size">
+                <option value="2048" selected>2048 bits (Recommended)</option>
+                <option value="4096">4096 bits</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="ca-root-validity" class="form-label">Root Validity (days)</label>
+              <input type="number" class="form-control" id="ca-root-validity" value="7300" min="365">
+              <div class="form-text">~20 years</div>
+            </div>
+            <div class="col-md-4">
+              <label for="ca-intermediate-validity" class="form-label">Intermediate (days)</label>
+              <input type="number" class="form-control" id="ca-intermediate-validity" value="3650" min="365">
+              <div class="form-text">~10 years</div>
+            </div>
+            <div class="col-md-4">
+              <label for="ca-entity-validity" class="form-label">Entity (days)</label>
+              <input type="number" class="form-control" id="ca-entity-validity" value="365" min="30">
+              <div class="form-text">~1 year</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Admin User -->
+        <div class="setup-step" data-step="4">
+          <h3 class="mb-4">Administrator Account</h3>
+
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Important:</strong> This account will have full system access. Keep these credentials secure!
+          </div>
+
+          <div class="mb-3">
+            <label for="admin-email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="admin-email" required>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="admin-first-name" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="admin-first-name" value="System">
+            </div>
+            <div class="col-md-6">
+              <label for="admin-last-name" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="admin-last-name" value="Administrator">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="admin-password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="admin-password" required>
+            <div class="form-text">Minimum 8 characters</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="admin-password-confirm" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="admin-password-confirm" required>
+          </div>
+
+          <div id="password-strength" class="mb-3"></div>
+        </div>
+
+        <!-- Step 5: Ecosystem Services Configuration -->
+        <div class="setup-step" data-step="5">
+          <h3 class="mb-4">Ecosystem Services Configuration</h3>
+
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>Enable Ecosystem Services</strong><br>
+            Select which Exprsn ecosystem services to enable. Note: Most services are specifications and need implementation before use.
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-auth" checked disabled>
+                <label class="form-check-label" for="service-auth">
+                  <strong>exprsn-auth</strong> - Authentication & SSO Service
+                </label>
+                <div class="form-text">Core authentication service (Required - Always enabled)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-spark">
+                <label class="form-check-label" for="service-spark">
+                  <strong>exprsn-spark</strong> - Real-time Messaging
+                </label>
+                <div class="form-text">WebSocket-based real-time messaging (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-timeline">
+                <label class="form-check-label" for="service-timeline">
+                  <strong>exprsn-timeline</strong> - Social Feed Platform
+                </label>
+                <div class="form-text">Social media timeline and feed service (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-prefetch">
+                <label class="form-check-label" for="service-prefetch">
+                  <strong>exprsn-prefetch</strong> - Timeline Prefetching
+                </label>
+                <div class="form-text">Timeline content prefetching and caching (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-moderator">
+                <label class="form-check-label" for="service-moderator">
+                  <strong>exprsn-moderator</strong> - Content Moderation
+                </label>
+                <div class="form-text">AI-powered content moderation service (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-filevault">
+                <label class="form-check-label" for="service-filevault">
+                  <strong>exprsn-filevault</strong> - File Storage
+                </label>
+                <div class="form-text">Distributed file storage with IPFS/Arweave support (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-gallery">
+                <label class="form-check-label" for="service-gallery">
+                  <strong>exprsn-gallery</strong> - Media Galleries
+                </label>
+                <div class="form-text">Photo and video gallery management (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="service-live">
+                <label class="form-check-label" for="service-live">
+                  <strong>exprsn-live</strong> - Live Streaming
+                </label>
+                <div class="form-text">Live video streaming with Cloudflare Stream (Specification - Requires implementation)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-warning mt-4">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Note:</strong> Enabling services here only configures their availability. You must implement the services separately following their specifications in <code>src/exprsn-*/</code> directories.
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Service Database Configuration</h5>
+          <p class="text-muted">Automatically create databases for selected services</p>
+
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>Database Creation</strong><br>
+            The setup wizard can automatically create separate databases for each service, or you can use a shared database approach.
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="create-service-databases" checked>
+            <label class="form-check-label" for="create-service-databases">
+              <strong>Automatically create databases for enabled services</strong>
+            </label>
+            <div class="form-text">Creates separate PostgreSQL databases for each service (recommended for production)</div>
+          </div>
+
+          <div id="service-db-options" class="ms-4">
+            <p class="small text-muted">Database naming pattern: <code>exprsn_{service_name}</code></p>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="db-ca" checked disabled>
+                  <label class="form-check-label" for="db-ca">
+                    <strong>exprsn_ca</strong> - Certificate Authority database (Required)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-auth" data-service="auth">
+                  <label class="form-check-label" for="db-auth">
+                    <strong>exprsn_auth</strong> - Authentication & SSO database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-spark" data-service="spark">
+                  <label class="form-check-label" for="db-spark">
+                    <strong>exprsn_spark</strong> - Real-time messaging database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-timeline" data-service="timeline">
+                  <label class="form-check-label" for="db-timeline">
+                    <strong>exprsn_timeline</strong> - Social feed database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-moderator" data-service="moderator">
+                  <label class="form-check-label" for="db-moderator">
+                    <strong>exprsn_moderator</strong> - Content moderation database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-filevault" data-service="filevault">
+                  <label class="form-check-label" for="db-filevault">
+                    <strong>exprsn_filevault</strong> - File storage metadata database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-gallery" data-service="gallery">
+                  <label class="form-check-label" for="db-gallery">
+                    <strong>exprsn_gallery</strong> - Media gallery database
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-db-check" type="checkbox" id="db-live" data-service="live">
+                  <label class="form-check-label" for="db-live">
+                    <strong>exprsn_live</strong> - Live streaming database
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>S3 Bucket Management</h5>
+          <p class="text-muted">Create S3 buckets for file storage (requires S3 storage to be configured)</p>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="create-s3-buckets">
+            <label class="form-check-label" for="create-s3-buckets">
+              <strong>Automatically create S3 buckets for services</strong>
+            </label>
+            <div class="form-text">Only available when S3 storage is configured in Advanced Settings</div>
+          </div>
+
+          <div id="s3-bucket-options" class="ms-4" style="display: none;">
+            <p class="small text-muted">Bucket naming pattern: <code>{bucket-name}-{service}</code></p>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="bucket-ca" checked>
+                  <label class="form-check-label" for="bucket-ca">
+                    <strong>ca-certs</strong> - Certificate and key storage
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-bucket-check" type="checkbox" id="bucket-filevault" data-service="filevault">
+                  <label class="form-check-label" for="bucket-filevault">
+                    <strong>filevault-files</strong> - User file storage
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-bucket-check" type="checkbox" id="bucket-gallery" data-service="gallery">
+                  <label class="form-check-label" for="bucket-gallery">
+                    <strong>gallery-media</strong> - Gallery images and videos
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input service-bucket-check" type="checkbox" id="bucket-live" data-service="live">
+                  <label class="form-check-label" for="bucket-live">
+                    <strong>live-recordings</strong> - Live stream recordings
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="bucket-backups">
+                  <label class="form-check-label" for="bucket-backups">
+                    <strong>system-backups</strong> - Automated system backups
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-outline-success btn-sm mt-2" id="create-buckets-btn">
+              <i class="bi bi-bucket"></i> Create Selected Buckets
+            </button>
+            <div id="bucket-creation-result"></div>
+          </div>
+        </div>
+
+        <!-- Step 6: Advanced Settings -->
+        <div class="setup-step" data-step="6">
+          <h3 class="mb-4">Advanced Settings</h3>
+
+          <h5>Application Settings</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="app-port" class="form-label">Application Port</label>
+              <input type="number" class="form-control" id="app-port" value="3000" min="1" max="65535">
+            </div>
+            <div class="col-md-6">
+              <label for="app-env" class="form-label">Environment</label>
+              <select class="form-select" id="app-env">
+                <option value="production" selected>Production</option>
+                <option value="development">Development</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="app-url" class="form-label">Application URL</label>
+            <input type="url" class="form-control" id="app-url" value="http://localhost:3000">
+            <div class="form-text">The public URL where this application will be accessible</div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Storage Settings</h5>
+
+          <div class="mb-3">
+            <label for="storage-type" class="form-label">Storage Backend</label>
+            <select class="form-select" id="storage-type">
+              <option value="disk" selected>Local Disk</option>
+              <option value="s3">Cloud Storage (S3-Compatible)</option>
+              <option value="postgresql">PostgreSQL</option>
+            </select>
+          </div>
+
+          <div id="storage-disk-config">
+            <div class="mb-3">
+              <label for="storage-disk-path" class="form-label">Storage Path</label>
+              <input type="text" class="form-control" id="storage-disk-path" value="./data/ca">
+            </div>
+          </div>
+
+          <div id="storage-s3-config" style="display: none;">
+            <div class="mb-3">
+              <label for="s3-provider" class="form-label">Cloud Storage Provider</label>
+              <select class="form-select" id="s3-provider">
+                <option value="aws" selected>Amazon AWS S3</option>
+                <option value="azure">Microsoft Azure Blob Storage</option>
+                <option value="digitalocean">DigitalOcean Spaces</option>
+                <option value="cloudflare">Cloudflare R2</option>
+                <option value="wasabi">Wasabi Cloud Storage</option>
+                <option value="custom">Custom S3-Compatible Endpoint</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="s3-bucket" class="form-label">Bucket/Container Name</label>
+              <input type="text" class="form-control" id="s3-bucket" placeholder="my-exprsn-ca-bucket">
+            </div>
+
+            <div class="mb-3">
+              <label for="s3-region" class="form-label">Region</label>
+              <input type="text" class="form-control" id="s3-region" value="us-east-1" placeholder="us-east-1">
+              <div class="form-text" id="s3-region-help">AWS: us-east-1, Azure: eastus, DO: nyc3</div>
+            </div>
+
+            <div id="s3-custom-endpoint-group" style="display: none;">
+              <div class="mb-3">
+                <label for="s3-endpoint" class="form-label">Custom S3 Endpoint URL</label>
+                <input type="url" class="form-control" id="s3-endpoint" placeholder="https://s3.custom-provider.com">
+                <div class="form-text">Full S3-compatible endpoint URL</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="s3-access-key" class="form-label">Access Key ID</label>
+              <input type="text" class="form-control" id="s3-access-key" placeholder="Your access key">
+              <div class="form-text" id="s3-access-key-help">AWS: Access Key ID, Azure: Storage Account Name, DO: Access Key</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="s3-secret-key" class="form-label">Secret Access Key</label>
+              <input type="password" class="form-control" id="s3-secret-key" placeholder="Your secret key">
+              <div class="form-text" id="s3-secret-key-help">AWS: Secret Access Key, Azure: Storage Account Key, DO: Secret Key</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="s3-bucket-prefix" class="form-label">Bucket Prefix (Optional)</label>
+              <input type="text" class="form-control" id="s3-bucket-prefix" value="ca/" placeholder="ca/">
+              <div class="form-text">Optional path prefix within the bucket (e.g., "ca/" or "exprsn/")</div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="s3-force-path-style">
+              <label class="form-check-label" for="s3-force-path-style">
+                Use path-style URLs (for some S3-compatible providers)
+              </label>
+              <div class="form-text">Enable for DigitalOcean Spaces and other providers that require path-style URLs</div>
+            </div>
+
+            <button type="button" class="btn btn-outline-primary btn-sm" id="test-s3-btn">
+              <i class="bi bi-cloud-check"></i> Test S3 Connection
+            </button>
+            <div id="s3-test-result"></div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>OCSP & CRL Settings</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="ocsp-enabled" checked>
+                <label class="form-check-label" for="ocsp-enabled">
+                  Enable OCSP Responder
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="crl-enabled" checked>
+                <label class="form-check-label" for="crl-enabled">
+                  Enable CRL Distribution
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="ocsp-port" class="form-label">OCSP Port</label>
+              <input type="number" class="form-control" id="ocsp-port" value="2560">
+            </div>
+            <div class="col-md-6">
+              <label for="ocsp-url" class="form-label">OCSP URL</label>
+              <input type="url" class="form-control" id="ocsp-url" value="http://ocsp.exprsn.io:2560">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="crl-url" class="form-label">CRL Distribution URL</label>
+            <input type="url" class="form-control" id="crl-url" value="http://crl.exprsn.io/crl">
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Rate Limiting</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="rate-limit-window" class="form-label">Time Window (ms)</label>
+              <input type="number" class="form-control" id="rate-limit-window" value="900000">
+              <div class="form-text">15 minutes</div>
+            </div>
+            <div class="col-md-6">
+              <label for="rate-limit-max" class="form-label">Max Requests</label>
+              <input type="number" class="form-control" id="rate-limit-max" value="100">
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Email/SMTP Configuration</h5>
+          <p class="text-muted">Configure email service for notifications, password resets, and alerts</p>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="smtp-enabled">
+            <label class="form-check-label" for="smtp-enabled">
+              Enable Email Service (SMTP)
+            </label>
+          </div>
+
+          <div id="smtp-config" style="display: none;">
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label for="smtp-host" class="form-label">SMTP Host</label>
+                <input type="text" class="form-control" id="smtp-host" placeholder="smtp.example.com">
+              </div>
+              <div class="col-md-4">
+                <label for="smtp-port" class="form-label">SMTP Port</label>
+                <input type="number" class="form-control" id="smtp-port" value="587">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="smtp-user" class="form-label">SMTP Username</label>
+                <input type="text" class="form-control" id="smtp-user" placeholder="user@example.com">
+              </div>
+              <div class="col-md-6">
+                <label for="smtp-password" class="form-label">SMTP Password</label>
+                <input type="password" class="form-control" id="smtp-password">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="smtp-from" class="form-label">From Email Address</label>
+                <input type="email" class="form-control" id="smtp-from" placeholder="noreply@example.com">
+              </div>
+              <div class="col-md-6">
+                <label for="smtp-from-name" class="form-label">From Name</label>
+                <input type="text" class="form-control" id="smtp-from-name" placeholder="Exprsn CA">
+              </div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="smtp-secure">
+              <label class="form-check-label" for="smtp-secure">
+                Use TLS/SSL (recommended for port 465)
+              </label>
+            </div>
+
+            <button type="button" class="btn btn-outline-primary btn-sm" id="test-smtp-btn">
+              <i class="bi bi-envelope-check"></i> Test SMTP Connection
+            </button>
+            <div id="smtp-test-result"></div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>SSO & SAML Configuration</h5>
+          <p class="text-muted">Enable Single Sign-On for enterprise authentication</p>
+
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="sso-enabled">
+            <label class="form-check-label" for="sso-enabled">
+              Enable SSO/SAML Authentication
+            </label>
+          </div>
+
+          <div id="sso-config" style="display: none;">
+            <div class="mb-3">
+              <label for="sso-provider" class="form-label">SSO Provider</label>
+              <select class="form-select" id="sso-provider">
+                <option value="">Select Provider</option>
+                <option value="generic">Generic SAML 2.0</option>
+                <option value="okta">Okta</option>
+                <option value="azure">Azure AD (Microsoft Entra ID)</option>
+                <option value="google">Google Workspace</option>
+                <option value="auth0">Auth0</option>
+                <option value="onelogin">OneLogin</option>
+                <option value="custom">Custom SAML Provider</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="sso-entity-id" class="form-label">Entity ID (SP)</label>
+              <input type="text" class="form-control" id="sso-entity-id" placeholder="https://ca.example.com/saml/metadata">
+              <div class="form-text">Service Provider Entity ID</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="sso-idp-metadata-url" class="form-label">IdP Metadata URL</label>
+              <input type="url" class="form-control" id="sso-idp-metadata-url" placeholder="https://idp.example.com/metadata">
+              <div class="form-text">Identity Provider metadata endpoint</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="sso-idp-sso-url" class="form-label">IdP SSO URL</label>
+              <input type="url" class="form-control" id="sso-idp-sso-url" placeholder="https://idp.example.com/sso">
+              <div class="form-text">Single Sign-On service URL</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="sso-idp-cert" class="form-label">IdP Certificate (X.509)</label>
+              <textarea class="form-control" id="sso-idp-cert" rows="4" placeholder="-----BEGIN CERTIFICATE-----
+MIIDXTCCAkWgAwIBAgIJAKPc...
+-----END CERTIFICATE-----"></textarea>
+              <div class="form-text">Identity Provider's public certificate for signature verification</div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="sso-acs-url" class="form-label">Assertion Consumer Service (ACS) URL</label>
+                <input type="url" class="form-control" id="sso-acs-url" placeholder="https://ca.example.com/saml/acs">
+              </div>
+              <div class="col-md-6">
+                <label for="sso-slo-url" class="form-label">Single Logout (SLO) URL</label>
+                <input type="url" class="form-control" id="sso-slo-url" placeholder="https://ca.example.com/saml/slo">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Attribute Mapping</label>
+              <div class="row mb-2">
+                <div class="col-md-4">
+                  <input type="text" class="form-control form-control-sm" id="sso-attr-email" value="email" placeholder="Email attribute">
+                  <div class="form-text">Email attribute name</div>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control form-control-sm" id="sso-attr-firstname" value="firstName" placeholder="First name">
+                  <div class="form-text">First name attribute</div>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control form-control-sm" id="sso-attr-lastname" value="lastName" placeholder="Last name">
+                  <div class="form-text">Last name attribute</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="sso-force-authn">
+              <label class="form-check-label" for="sso-force-authn">
+                Force authentication on each login request
+              </label>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="sso-allow-local">
+              <label class="form-check-label" for="sso-allow-local">
+                Allow local authentication fallback
+              </label>
+              <div class="form-text">Permit username/password login when SSO is unavailable</div>
+            </div>
+
+            <button type="button" class="btn btn-outline-primary btn-sm" id="test-sso-btn">
+              <i class="bi bi-shield-check"></i> Validate SAML Configuration
+            </button>
+            <div id="sso-test-result"></div>
+          </div>
+
+          <hr class="my-4">
+
+          <h5>Additional Groups (Optional)</h5>
+          <p class="text-muted">Create custom groups beyond the default ones. You can add more later.</p>
+
+          <div id="custom-groups-container"></div>
+
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="add-group-btn">
+            <i class="bi bi-plus-circle"></i> Add Custom Group
+          </button>
+        </div>
+
+        <!-- Step 7: Review & Execute -->
+        <div class="setup-step" data-step="7">
+          <h3 class="mb-4">Review Configuration</h3>
+
+          <div class="alert alert-info">
+            Review your configuration below. Once you click "Complete Setup", the system will:
+            <ul class="mb-0 mt-2">
+              <li>Create the database schema</li>
+              <li>Generate root and intermediate certificates</li>
+              <li>Create the administrator account</li>
+              <li>Set up default groups and roles</li>
+              <li>Save configuration to .env file</li>
+            </ul>
+          </div>
+
+          <div class="progress-summary" id="config-summary">
+            <!-- Will be populated by JavaScript -->
+          </div>
+
+          <div class="mt-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="confirm-setup">
+              <label class="form-check-label" for="confirm-setup">
+                <strong>I confirm that the configuration is correct and I want to proceed with setup.</strong>
+              </label>
+            </div>
+          </div>
+
+          <div id="setup-progress" class="mt-4" style="display: none;">
+            <h5>Setup Progress</h5>
+            <div class="progress mb-3">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" id="setup-progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+            <div id="setup-status"></div>
+          </div>
+
+          <div id="setup-result" class="mt-4"></div>
+        </div>
+      </div>
+
+      <div class="setup-footer">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1;">
+          <button type="button" class="btn btn-outline-secondary" id="prev-btn" style="display: none;">
+            <i class="bi bi-arrow-left"></i> Previous
+          </button>
+          <small class="text-muted" style="margin-left: auto;">
+            <i class="bi bi-keyboard"></i>
+            <kbd>Alt</kbd> + <kbd>←</kbd> / <kbd>→</kbd> to navigate
+          </small>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-primary" id="next-btn">
+            Next <i class="bi bi-arrow-right"></i>
+          </button>
+          <button type="button" class="btn btn-success" id="complete-btn" style="display: none;">
+            <i class="bi bi-check-circle"></i> Complete Setup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 7;
+    const setupData = {};
+    let ddlUploaded = false;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateStepDisplay();
+      attachEventListeners();
+      setupKeyboardNavigation();
+    });
+
+    // Keyboard navigation support
+    function setupKeyboardNavigation() {
+      document.addEventListener('keydown', function(e) {
+        // Alt + Right Arrow = Next Step
+        if (e.altKey && e.key === 'ArrowRight' && currentStep < totalSteps) {
+          e.preventDefault();
+          document.getElementById('next-btn').click();
+        }
+        // Alt + Left Arrow = Previous Step
+        else if (e.altKey && e.key === 'ArrowLeft' && currentStep > 1) {
+          e.preventDefault();
+          document.getElementById('prev-btn').click();
+        }
+        // Alt + Enter = Complete Setup (on review step)
+        else if (e.altKey && e.key === 'Enter' && currentStep === totalSteps) {
+          e.preventDefault();
+          document.getElementById('complete-btn').click();
+        }
+      });
+    }
+
+    function attachEventListeners() {
+      // Navigation buttons
+      document.getElementById('next-btn').addEventListener('click', nextStep);
+      document.getElementById('prev-btn').addEventListener('click', prevStep);
+      document.getElementById('complete-btn').addEventListener('click', completeSetup);
+
+      // Test buttons
+      document.getElementById('test-db-btn').addEventListener('click', testDatabase);
+      document.getElementById('test-redis-btn').addEventListener('click', testRedis);
+      document.getElementById('upload-ddl-btn').addEventListener('click', uploadDDL);
+
+      if (document.getElementById('test-s3-btn')) {
+        document.getElementById('test-s3-btn').addEventListener('click', testS3Connection);
+      }
+
+      // Redis enable/disable
+      document.getElementById('redis-enabled').addEventListener('change', function(e) {
+        document.getElementById('redis-config').style.display = e.target.checked ? 'block' : 'none';
+      });
+
+      // Storage type change
+      document.getElementById('storage-type').addEventListener('change', function(e) {
+        document.getElementById('storage-disk-config').style.display = e.target.value === 'disk' ? 'block' : 'none';
+        document.getElementById('storage-s3-config').style.display = e.target.value === 's3' ? 'block' : 'none';
+      });
+
+      // S3 provider change
+      document.getElementById('s3-provider').addEventListener('change', function(e) {
+        const provider = e.target.value;
+        const customEndpoint = document.getElementById('s3-custom-endpoint-group');
+        const forcePathStyle = document.getElementById('s3-force-path-style');
+
+        // Show/hide custom endpoint
+        customEndpoint.style.display = provider === 'custom' ? 'block' : 'none';
+
+        // Auto-check path-style for DO and Wasabi
+        if (provider === 'digitalocean' || provider === 'wasabi') {
+          forcePathStyle.checked = true;
+        } else if (provider === 'aws') {
+          forcePathStyle.checked = false;
+        }
+
+        // Update helper text
+        updateS3HelperText(provider);
+      });
+
+      // Add group button
+      document.getElementById('add-group-btn').addEventListener('click', addCustomGroup);
+
+      // Password strength check
+      document.getElementById('admin-password').addEventListener('input', checkPasswordStrength);
+
+      // SMTP enable/disable
+      document.getElementById('smtp-enabled').addEventListener('change', function(e) {
+        document.getElementById('smtp-config').style.display = e.target.checked ? 'block' : 'none';
+      });
+
+      // SSO enable/disable
+      document.getElementById('sso-enabled').addEventListener('change', function(e) {
+        document.getElementById('sso-config').style.display = e.target.checked ? 'block' : 'none';
+      });
+
+      // Test SMTP button
+      if (document.getElementById('test-smtp-btn')) {
+        document.getElementById('test-smtp-btn').addEventListener('click', testSMTP);
+      }
+
+      // Test SSO button
+      if (document.getElementById('test-sso-btn')) {
+        document.getElementById('test-sso-btn').addEventListener('click', validateSSO);
+      }
+
+      // Create S3 buckets toggle
+      document.getElementById('create-s3-buckets').addEventListener('change', function(e) {
+        document.getElementById('s3-bucket-options').style.display = e.target.checked ? 'block' : 'none';
+      });
+
+      // Create buckets button
+      if (document.getElementById('create-buckets-btn')) {
+        document.getElementById('create-buckets-btn').addEventListener('click', createS3Buckets);
+      }
+
+      // Service selection auto-checks database/bucket creation
+      document.querySelectorAll('[id^="service-"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function(e) {
+          const serviceId = e.target.id.replace('service-', '');
+          const dbCheckbox = document.getElementById(`db-${serviceId}`);
+          const bucketCheckbox = document.getElementById(`bucket-${serviceId}`);
+
+          if (e.target.checked) {
+            if (dbCheckbox) dbCheckbox.checked = true;
+            if (bucketCheckbox) bucketCheckbox.checked = true;
+          }
+        });
+      });
+    }
+
+    function updateS3HelperText(provider) {
+      const regionHelp = document.getElementById('s3-region-help');
+      const accessKeyHelp = document.getElementById('s3-access-key-help');
+      const secretKeyHelp = document.getElementById('s3-secret-key-help');
+
+      switch(provider) {
+        case 'aws':
+          regionHelp.textContent = 'Examples: us-east-1, eu-west-1, ap-southeast-1';
+          accessKeyHelp.textContent = 'AWS Access Key ID';
+          secretKeyHelp.textContent = 'AWS Secret Access Key';
+          break;
+        case 'azure':
+          regionHelp.textContent = 'Examples: eastus, westus2, westeurope';
+          accessKeyHelp.textContent = 'Azure Storage Account Name';
+          secretKeyHelp.textContent = 'Azure Storage Account Key';
+          break;
+        case 'digitalocean':
+          regionHelp.textContent = 'Examples: nyc3, sfo3, sgp1, fra1';
+          accessKeyHelp.textContent = 'DigitalOcean Spaces Access Key';
+          secretKeyHelp.textContent = 'DigitalOcean Spaces Secret Key';
+          document.getElementById('s3-region').value = 'nyc3';
+          break;
+        case 'cloudflare':
+          regionHelp.textContent = 'Use "auto" for Cloudflare R2';
+          accessKeyHelp.textContent = 'Cloudflare R2 Access Key ID';
+          secretKeyHelp.textContent = 'Cloudflare R2 Secret Access Key';
+          document.getElementById('s3-region').value = 'auto';
+          break;
+        case 'wasabi':
+          regionHelp.textContent = 'Examples: us-east-1, us-west-1, eu-central-1';
+          accessKeyHelp.textContent = 'Wasabi Access Key';
+          secretKeyHelp.textContent = 'Wasabi Secret Key';
+          break;
+        default:
+          regionHelp.textContent = 'Region identifier for your S3-compatible storage';
+          accessKeyHelp.textContent = 'Access Key ID from your provider';
+          secretKeyHelp.textContent = 'Secret Access Key from your provider';
+      }
+    }
+
+    function nextStep() {
+      if (!validateStep(currentStep)) {
+        return;
+      }
+
+      saveStepData(currentStep);
+
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepDisplay();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay();
+      }
+    }
+
+    function updateStepDisplay() {
+      // Update step indicators
+      document.querySelectorAll('.step-indicator-item').forEach((item, index) => {
+        const stepNum = index + 1;
+        item.classList.remove('active', 'completed');
+
+        if (stepNum === currentStep) {
+          item.classList.add('active');
+        } else if (stepNum < currentStep) {
+          item.classList.add('completed');
+        }
+      });
+
+      // Update step content
+      document.querySelectorAll('.setup-step').forEach(step => {
+        step.classList.remove('active');
+      });
+      document.querySelector(`.setup-step[data-step="${currentStep}"]`).classList.add('active');
+
+      // Update buttons
+      document.getElementById('prev-btn').style.display = currentStep > 1 ? 'block' : 'none';
+      document.getElementById('next-btn').style.display = currentStep < totalSteps ? 'block' : 'none';
+      document.getElementById('complete-btn').style.display = currentStep === totalSteps ? 'block' : 'none';
+
+      // If on review step, populate summary
+      if (currentStep === 7) {
+        populateReviewSummary();
+      }
+    }
+
+    function validateStep(step) {
+      switch(step) {
+        case 2:
+          // Database validation
+          const dbHost = document.getElementById('db-host').value;
+          const dbName = document.getElementById('db-name').value;
+          const dbUser = document.getElementById('db-username').value;
+
+          if (!dbHost || !dbName || !dbUser) {
+            alert('Please fill in all required database fields');
+            return false;
+          }
+          break;
+
+        case 3:
+          // CA settings validation
+          const caName = document.getElementById('ca-name').value;
+          const caDomain = document.getElementById('ca-domain').value;
+          const caCountry = document.getElementById('ca-country').value;
+          const caOrg = document.getElementById('ca-organization').value;
+          const caEmail = document.getElementById('ca-email').value;
+
+          if (!caName || !caDomain || !caCountry || !caOrg || !caEmail) {
+            alert('Please fill in all required CA fields');
+            return false;
+          }
+
+          if (caCountry.length !== 2) {
+            alert('Country code must be exactly 2 characters');
+            return false;
+          }
+          break;
+
+        case 4:
+          // Admin user validation
+          const adminEmail = document.getElementById('admin-email').value;
+          const adminPassword = document.getElementById('admin-password').value;
+          const adminPasswordConfirm = document.getElementById('admin-password-confirm').value;
+
+          if (!adminEmail || !adminPassword) {
+            alert('Please fill in all required admin fields');
+            return false;
+          }
+
+          if (adminPassword.length < 8) {
+            alert('Password must be at least 8 characters');
+            return false;
+          }
+
+          if (adminPassword !== adminPasswordConfirm) {
+            alert('Passwords do not match');
+            return false;
+          }
+          break;
+      }
+
+      return true;
+    }
+
+    function saveStepData(step) {
+      switch(step) {
+        case 2:
+          setupData.database = {
+            host: document.getElementById('db-host').value,
+            port: parseInt(document.getElementById('db-port').value),
+            database: document.getElementById('db-name').value,
+            username: document.getElementById('db-username').value,
+            password: document.getElementById('db-password').value,
+            ssl: document.getElementById('db-ssl').checked,
+            poolMin: parseInt(document.getElementById('db-pool-min').value),
+            poolMax: parseInt(document.getElementById('db-pool-max').value),
+            poolIdle: parseInt(document.getElementById('db-pool-idle').value),
+            poolAcquire: parseInt(document.getElementById('db-pool-acquire').value),
+            applyDDL: document.getElementById('db-apply-ddl').checked,
+            ddlUploaded: ddlUploaded
+          };
+
+          setupData.redis = {
+            enabled: document.getElementById('redis-enabled').checked,
+            host: document.getElementById('redis-host').value,
+            port: parseInt(document.getElementById('redis-port').value),
+            password: document.getElementById('redis-password').value,
+            db: parseInt(document.getElementById('redis-db').value)
+          };
+          break;
+
+        case 3:
+          setupData.ca = {
+            name: document.getElementById('ca-name').value,
+            domain: document.getElementById('ca-domain').value,
+            country: document.getElementById('ca-country').value.toUpperCase(),
+            state: document.getElementById('ca-state').value,
+            locality: document.getElementById('ca-locality').value,
+            organization: document.getElementById('ca-organization').value,
+            organizationalUnit: document.getElementById('ca-org-unit').value,
+            email: document.getElementById('ca-email').value,
+            createIntermediate: document.getElementById('ca-create-intermediate').checked,
+            rootKeySize: parseInt(document.getElementById('ca-root-key-size').value),
+            intermediateKeySize: parseInt(document.getElementById('ca-intermediate-key-size').value),
+            entityKeySize: parseInt(document.getElementById('ca-entity-key-size').value),
+            rootValidityDays: parseInt(document.getElementById('ca-root-validity').value),
+            intermediateValidityDays: parseInt(document.getElementById('ca-intermediate-validity').value),
+            entityValidityDays: parseInt(document.getElementById('ca-entity-validity').value)
+          };
+          break;
+
+        case 4:
+          setupData.admin = {
+            email: document.getElementById('admin-email').value,
+            password: document.getElementById('admin-password').value,
+            firstName: document.getElementById('admin-first-name').value,
+            lastName: document.getElementById('admin-last-name').value
+          };
+          break;
+
+        case 5:
+          // Save enabled services
+          setupData.services = {
+            auth: document.getElementById('service-auth').checked,
+            spark: document.getElementById('service-spark').checked,
+            timeline: document.getElementById('service-timeline').checked,
+            prefetch: document.getElementById('service-prefetch').checked,
+            moderator: document.getElementById('service-moderator').checked,
+            filevault: document.getElementById('service-filevault').checked,
+            gallery: document.getElementById('service-gallery').checked,
+            live: document.getElementById('service-live').checked
+          };
+
+          // Save database creation settings
+          setupData.serviceDatabases = {
+            createDatabases: document.getElementById('create-service-databases').checked,
+            databases: []
+          };
+
+          if (setupData.serviceDatabases.createDatabases) {
+            document.querySelectorAll('.service-db-check:checked').forEach(checkbox => {
+              setupData.serviceDatabases.databases.push(checkbox.dataset.service);
+            });
+            // Always include CA database
+            setupData.serviceDatabases.databases.unshift('ca');
+          }
+
+          // Save S3 bucket creation settings
+          setupData.s3Buckets = {
+            createBuckets: document.getElementById('create-s3-buckets').checked,
+            buckets: []
+          };
+
+          if (setupData.s3Buckets.createBuckets) {
+            if (document.getElementById('bucket-ca').checked) setupData.s3Buckets.buckets.push('ca-certs');
+            if (document.getElementById('bucket-filevault')?.checked) setupData.s3Buckets.buckets.push('filevault-files');
+            if (document.getElementById('bucket-gallery')?.checked) setupData.s3Buckets.buckets.push('gallery-media');
+            if (document.getElementById('bucket-live')?.checked) setupData.s3Buckets.buckets.push('live-recordings');
+            if (document.getElementById('bucket-backups').checked) setupData.s3Buckets.buckets.push('system-backups');
+          }
+          break;
+
+        case 6:
+          setupData.app = {
+            port: parseInt(document.getElementById('app-port').value),
+            environment: document.getElementById('app-env').value,
+            url: document.getElementById('app-url').value,
+            host: '0.0.0.0'
+          };
+
+          setupData.storage = {
+            type: document.getElementById('storage-type').value,
+            diskPath: document.getElementById('storage-disk-path').value,
+            diskCertsPath: document.getElementById('storage-disk-path').value + '/certs',
+            diskKeysPath: document.getElementById('storage-disk-path').value + '/keys',
+            diskCrlPath: document.getElementById('storage-disk-path').value + '/crl',
+            diskOcspPath: document.getElementById('storage-disk-path').value + '/ocsp'
+          };
+
+          if (setupData.storage.type === 's3') {
+            setupData.storage.s3Provider = document.getElementById('s3-provider').value;
+            setupData.storage.s3BucketName = document.getElementById('s3-bucket').value;
+            setupData.storage.s3Region = document.getElementById('s3-region').value;
+            setupData.storage.s3AccessKey = document.getElementById('s3-access-key').value;
+            setupData.storage.s3SecretKey = document.getElementById('s3-secret-key').value;
+            setupData.storage.s3BucketPrefix = document.getElementById('s3-bucket-prefix').value;
+            setupData.storage.s3ForcePathStyle = document.getElementById('s3-force-path-style').checked;
+            if (document.getElementById('s3-endpoint')) {
+              setupData.storage.s3Endpoint = document.getElementById('s3-endpoint').value;
+            }
+          }
+
+          setupData.ocsp = {
+            enabled: document.getElementById('ocsp-enabled').checked,
+            port: parseInt(document.getElementById('ocsp-port').value),
+            url: document.getElementById('ocsp-url').value
+          };
+
+          setupData.crl = {
+            enabled: document.getElementById('crl-enabled').checked,
+            url: document.getElementById('crl-url').value
+          };
+
+          setupData.rateLimit = {
+            windowMs: parseInt(document.getElementById('rate-limit-window').value),
+            maxRequests: parseInt(document.getElementById('rate-limit-max').value)
+          };
+
+          // SMTP Configuration
+          setupData.smtp = {
+            enabled: document.getElementById('smtp-enabled').checked,
+            host: document.getElementById('smtp-host').value,
+            port: parseInt(document.getElementById('smtp-port').value) || 587,
+            user: document.getElementById('smtp-user').value,
+            password: document.getElementById('smtp-password').value,
+            from: document.getElementById('smtp-from').value,
+            fromName: document.getElementById('smtp-from-name').value,
+            secure: document.getElementById('smtp-secure').checked
+          };
+
+          // SSO/SAML Configuration
+          setupData.sso = {
+            enabled: document.getElementById('sso-enabled').checked,
+            provider: document.getElementById('sso-provider').value,
+            entityId: document.getElementById('sso-entity-id').value,
+            idpMetadataUrl: document.getElementById('sso-idp-metadata-url').value,
+            idpSsoUrl: document.getElementById('sso-idp-sso-url').value,
+            idpCert: document.getElementById('sso-idp-cert').value,
+            acsUrl: document.getElementById('sso-acs-url').value,
+            sloUrl: document.getElementById('sso-slo-url').value,
+            attributeMapping: {
+              email: document.getElementById('sso-attr-email').value,
+              firstName: document.getElementById('sso-attr-firstname').value,
+              lastName: document.getElementById('sso-attr-lastname').value
+            },
+            forceAuthn: document.getElementById('sso-force-authn').checked,
+            allowLocal: document.getElementById('sso-allow-local').checked
+          };
+
+          setupData.session = {
+            maxAge: 86400000,
+            secure: setupData.app.environment === 'production',
+            sameSite: 'lax'
+          };
+
+          setupData.logging = {
+            level: setupData.app.environment === 'production' ? 'info' : 'debug'
+          };
+
+          setupData.cache = {
+            tokenTtl: 60,
+            certTtl: 300,
+            ocspTtl: 300
+          };
+
+          // Custom groups
+          setupData.groups = [];
+          document.querySelectorAll('.template-group').forEach(group => {
+            const name = group.querySelector('.group-name').value;
+            const slug = group.querySelector('.group-slug').value;
+            const description = group.querySelector('.group-description').value;
+
+            if (name && slug) {
+              setupData.groups.push({
+                name,
+                slug,
+                type: 'organizational_unit',
+                description
+              });
+            }
+          });
+          break;
+      }
+    }
+
+    function populateReviewSummary() {
+      const summary = document.getElementById('config-summary');
+
+      let html = '<h5 class="mb-3"><i class="bi bi-list-check"></i> Configuration Summary</h5>';
+
+      html += '<div class="progress-item">';
+      html += '<div class="progress-icon"><i class="bi bi-database-fill text-primary"></i></div>';
+      html += '<div><strong>Database:</strong> ' + setupData.database.database + ' @ ' + setupData.database.host + ':' + setupData.database.port + '</div>';
+      html += '</div>';
+
+      html += '<div class="progress-item">';
+      html += '<div class="progress-icon"><i class="bi bi-shield-fill-check text-success"></i></div>';
+      html += '<div><strong>CA Name:</strong> ' + setupData.ca.name + ' (' + setupData.ca.domain + ')</div>';
+      html += '</div>';
+
+      html += '<div class="progress-item">';
+      html += '<div class="progress-icon"><i class="bi bi-person-fill-gear text-warning"></i></div>';
+      html += '<div><strong>Admin Email:</strong> ' + setupData.admin.email + '</div>';
+      html += '</div>';
+
+      html += '<div class="progress-item">';
+      html += '<div class="progress-icon"><i class="bi bi-gear-fill text-info"></i></div>';
+      html += '<div><strong>Application:</strong> Port ' + setupData.app.port + ' (' + setupData.app.environment + ')</div>';
+      html += '</div>';
+
+      if (setupData.redis.enabled) {
+        html += '<div class="progress-item">';
+        html += '<div class="progress-icon"><i class="bi bi-lightning-fill text-danger"></i></div>';
+        html += '<div><strong>Redis:</strong> Enabled @ ' + setupData.redis.host + ':' + setupData.redis.port + '</div>';
+        html += '</div>';
+      }
+
+      if (setupData.ca.createIntermediate) {
+        html += '<div class="progress-item">';
+        html += '<div class="progress-icon"><i class="bi bi-diagram-3-fill text-secondary"></i></div>';
+        html += '<div><strong>Certificates:</strong> Root + Intermediate CA</div>';
+        html += '</div>';
+      }
+
+      summary.innerHTML = html;
+    }
+
+    async function testDatabase() {
+      const btn = document.getElementById('test-db-btn');
+      const result = document.getElementById('db-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+
+      try {
+        const response = await fetch('/setup/test-database', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: document.getElementById('db-host').value,
+            port: parseInt(document.getElementById('db-port').value),
+            database: document.getElementById('db-name').value,
+            username: document.getElementById('db-username').value,
+            password: document.getElementById('db-password').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          result.innerHTML = '<div class="test-result success"><i class="bi bi-check-circle-fill"></i> Connection successful!</div>';
+
+          // Show DDL upload button if auto-apply is enabled
+          if (document.getElementById('db-apply-ddl').checked) {
+            document.getElementById('upload-ddl-btn').style.display = 'inline-block';
+            result.innerHTML += '<div class="alert alert-info mt-2"><small>Click "Upload Schema (DDL)" to apply the database schema automatically.</small></div>';
+          }
+        } else {
+          result.innerHTML = '<div class="test-result error"><i class="bi bi-x-circle-fill"></i> Connection failed: ' + data.error + '</div>';
+          document.getElementById('upload-ddl-btn').style.display = 'none';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+        document.getElementById('upload-ddl-btn').style.display = 'none';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plug"></i> Test Connection';
+      }
+    }
+
+    async function testRedis() {
+      const btn = document.getElementById('test-redis-btn');
+      const result = document.getElementById('redis-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+
+      try {
+        const response = await fetch('/setup/test-redis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: document.getElementById('redis-host').value,
+            port: parseInt(document.getElementById('redis-port').value),
+            password: document.getElementById('redis-password').value,
+            db: parseInt(document.getElementById('redis-db').value)
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          result.innerHTML = '<div class="test-result success"><i class="bi bi-check-circle-fill"></i> Connection successful!</div>';
+        } else {
+          result.innerHTML = '<div class="test-result error"><i class="bi bi-x-circle-fill"></i> Connection failed: ' + data.error + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plug"></i> Test Connection';
+      }
+    }
+
+    async function testS3Connection() {
+      const btn = document.getElementById('test-s3-btn');
+      const result = document.getElementById('s3-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+
+      try {
+        const response = await fetch('/setup/test-s3', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: document.getElementById('s3-provider').value,
+            bucket: document.getElementById('s3-bucket').value,
+            region: document.getElementById('s3-region').value,
+            endpoint: document.getElementById('s3-endpoint')?.value,
+            accessKey: document.getElementById('s3-access-key').value,
+            secretKey: document.getElementById('s3-secret-key').value,
+            forcePathStyle: document.getElementById('s3-force-path-style').checked
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          result.innerHTML = '<div class="test-result success mt-2"><i class="bi bi-check-circle-fill"></i> S3 connection successful!</div>';
+        } else {
+          result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Connection failed: ' + data.error + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-check"></i> Test S3 Connection';
+      }
+    }
+
+    async function uploadDDL() {
+      const btn = document.getElementById('upload-ddl-btn');
+      const result = document.getElementById('db-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Uploading...';
+
+      try {
+        const response = await fetch('/setup/upload-ddl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: document.getElementById('db-host').value,
+            port: parseInt(document.getElementById('db-port').value),
+            database: document.getElementById('db-name').value,
+            username: document.getElementById('db-username').value,
+            password: document.getElementById('db-password').value,
+            ssl: document.getElementById('db-ssl').checked
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          ddlUploaded = true;
+          result.innerHTML += '<div class="test-result success mt-2"><i class="bi bi-check-circle-fill"></i> Database schema uploaded successfully! Tables created: ' + (data.tablesCreated || 'N/A') + '</div>';
+        } else {
+          result.innerHTML += '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> DDL upload failed: ' + data.error + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML += '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-upload"></i> Upload Schema (DDL)';
+      }
+    }
+
+    function addCustomGroup() {
+      const container = document.getElementById('custom-groups-container');
+      const groupId = Date.now();
+
+      const html = `
+        <div class="template-group" data-group-id="${groupId}">
+          <button type="button" class="btn btn-sm btn-outline-danger btn-remove" onclick="removeGroup(${groupId})">
+            <i class="bi bi-trash"></i>
+          </button>
+          <div class="row mb-2">
+            <div class="col-md-6">
+              <input type="text" class="form-control form-control-sm group-name" placeholder="Group Name">
+            </div>
+            <div class="col-md-6">
+              <input type="text" class="form-control form-control-sm group-slug" placeholder="group-slug">
+            </div>
+          </div>
+          <div>
+            <textarea class="form-control form-control-sm group-description" rows="2" placeholder="Description"></textarea>
+          </div>
+        </div>
+      `;
+
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeGroup(groupId) {
+      const group = document.querySelector(`[data-group-id="${groupId}"]`);
+      if (group) {
+        group.remove();
+      }
+    }
+
+    function checkPasswordStrength() {
+      const password = document.getElementById('admin-password').value;
+      const strengthDiv = document.getElementById('password-strength');
+
+      if (!password) {
+        strengthDiv.innerHTML = '';
+        return;
+      }
+
+      let strength = 0;
+      let feedback = [];
+
+      if (password.length >= 8) strength++;
+      if (password.length >= 12) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+      if (password.length < 8) feedback.push('At least 8 characters');
+      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password)) feedback.push('Mix of uppercase and lowercase');
+      if (!/\d/.test(password)) feedback.push('Include numbers');
+      if (!/[^a-zA-Z0-9]/.test(password)) feedback.push('Include special characters');
+
+      let color = 'danger';
+      let text = 'Weak';
+
+      if (strength >= 4) {
+        color = 'success';
+        text = 'Strong';
+      } else if (strength >= 3) {
+        color = 'warning';
+        text = 'Medium';
+      }
+
+      let html = `
+        <div class="alert alert-${color} py-2">
+          <small><strong>Password Strength: ${text}</strong></small>
+          ${feedback.length > 0 ? '<br><small>Suggestions: ' + feedback.join(', ') + '</small>' : ''}
+        </div>
+      `;
+
+      strengthDiv.innerHTML = html;
+    }
+
+    async function completeSetup() {
+      const confirmCheckbox = document.getElementById('confirm-setup');
+
+      if (!confirmCheckbox.checked) {
+        alert('Please confirm that you want to proceed with setup');
+        return;
+      }
+
+      const btn = document.getElementById('complete-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Setting up...';
+
+      // Save final step data
+      saveStepData(5);
+
+      // Show progress
+      document.getElementById('setup-progress').style.display = 'block';
+      updateProgress(10, 'Validating configuration...');
+
+      try {
+        // Validate first
+        updateProgress(20, 'Validating configuration...');
+        const validateResponse = await fetch('/setup/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(setupData)
+        });
+
+        const validateData = await validateResponse.json();
+
+        if (!validateData.valid) {
+          throw new Error('Validation failed: ' + validateData.errors.join(', '));
+        }
+
+        // Run setup
+        updateProgress(40, 'Creating database schema...');
+
+        const setupResponse = await fetch('/setup/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(setupData)
+        });
+
+        if (!setupResponse.ok) {
+          const errorData = await setupResponse.json();
+          throw new Error(errorData.message || 'Setup failed');
+        }
+
+        updateProgress(60, 'Generating certificates...');
+        await sleep(1000);
+
+        updateProgress(80, 'Creating admin user...');
+        await sleep(1000);
+
+        updateProgress(90, 'Setting up groups and roles...');
+        await sleep(1000);
+
+        const result = await setupResponse.json();
+
+        updateProgress(100, 'Setup complete!');
+
+        // Show success message
+        const resultDiv = document.getElementById('setup-result');
+        resultDiv.innerHTML = `
+          <div class="alert alert-success">
+            <h4 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Setup Completed Successfully!</h4>
+            <p>Your Certificate Authority has been configured and is ready to use.</p>
+            <hr>
+            <ul class="mb-0">
+              <li><strong>Admin User Created:</strong> ${setupData.admin.email}</li>
+              <li><strong>Root Certificate:</strong> Generated</li>
+              ${setupData.ca.createIntermediate ? '<li><strong>Intermediate Certificate:</strong> Generated</li>' : ''}
+              <li><strong>Groups Created:</strong> ${result.data.groupsCreated}</li>
+              <li><strong>Roles Created:</strong> ${result.data.rolesCreated}</li>
+            </ul>
+            <hr>
+            <p class="mb-0">
+              <strong>The system will restart in 5 seconds...</strong><br>
+              You will be redirected to the login page.
+            </p>
+          </div>
+        `;
+
+        // Redirect after 5 seconds
+        setTimeout(() => {
+          window.location.href = '/auth/login';
+        }, 5000);
+
+      } catch (error) {
+        updateProgress(0, 'Setup failed');
+
+        const resultDiv = document.getElementById('setup-result');
+        resultDiv.innerHTML = `
+          <div class="alert alert-danger">
+            <h4 class="alert-heading"><i class="bi bi-x-circle-fill"></i> Setup Failed</h4>
+            <p>${error.message}</p>
+            <hr>
+            <p class="mb-0">Please review your configuration and try again.</p>
+          </div>
+        `;
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Complete Setup';
+      }
+    }
+
+    function updateProgress(percent, message) {
+      const bar = document.getElementById('setup-progress-bar');
+      const status = document.getElementById('setup-status');
+
+      bar.style.width = percent + '%';
+      bar.textContent = percent + '%';
+      status.innerHTML = '<small><i class="bi bi-arrow-right"></i> ' + message + '</small>';
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function testSMTP() {
+      const btn = document.getElementById('test-smtp-btn');
+      const result = document.getElementById('smtp-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+
+      try {
+        const response = await fetch('/setup/test-smtp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: document.getElementById('smtp-host').value,
+            port: parseInt(document.getElementById('smtp-port').value),
+            user: document.getElementById('smtp-user').value,
+            password: document.getElementById('smtp-password').value,
+            secure: document.getElementById('smtp-secure').checked,
+            from: document.getElementById('smtp-from').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          result.innerHTML = '<div class="test-result success mt-2"><i class="bi bi-check-circle-fill"></i> SMTP connection successful!</div>';
+        } else {
+          result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Connection failed: ' + data.error + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-envelope-check"></i> Test SMTP Connection';
+      }
+    }
+
+    async function validateSSO() {
+      const btn = document.getElementById('test-sso-btn');
+      const result = document.getElementById('sso-test-result');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Validating...';
+
+      try {
+        const response = await fetch('/setup/validate-sso', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: document.getElementById('sso-provider').value,
+            entityId: document.getElementById('sso-entity-id').value,
+            idpMetadataUrl: document.getElementById('sso-idp-metadata-url').value,
+            idpSsoUrl: document.getElementById('sso-idp-sso-url').value,
+            idpCert: document.getElementById('sso-idp-cert').value,
+            acsUrl: document.getElementById('sso-acs-url').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.valid) {
+          result.innerHTML = '<div class="test-result success mt-2"><i class="bi bi-check-circle-fill"></i> SAML configuration is valid!</div>';
+        } else {
+          result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Validation failed: ' + (data.errors ? data.errors.join(', ') : data.error) + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-shield-check"></i> Validate SAML Configuration';
+      }
+    }
+
+    async function createS3Buckets() {
+      const btn = document.getElementById('create-buckets-btn');
+      const result = document.getElementById('bucket-creation-result');
+
+      // Check if S3 is configured
+      if (document.getElementById('storage-type').value !== 's3') {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Please configure S3 storage in Advanced Settings first</div>';
+        return;
+      }
+
+      const buckets = [];
+      if (document.getElementById('bucket-ca').checked) buckets.push('ca-certs');
+      if (document.getElementById('bucket-filevault')?.checked) buckets.push('filevault-files');
+      if (document.getElementById('bucket-gallery')?.checked) buckets.push('gallery-media');
+      if (document.getElementById('bucket-live')?.checked) buckets.push('live-recordings');
+      if (document.getElementById('bucket-backups').checked) buckets.push('system-backups');
+
+      if (buckets.length === 0) {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Please select at least one bucket to create</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+
+      try {
+        // Get S3 configuration from step 6
+        const s3Config = {
+          provider: document.getElementById('s3-provider').value,
+          bucket: document.getElementById('s3-bucket').value,
+          region: document.getElementById('s3-region').value,
+          endpoint: document.getElementById('s3-endpoint')?.value,
+          accessKey: document.getElementById('s3-access-key').value,
+          secretKey: document.getElementById('s3-secret-key').value,
+          forcePathStyle: document.getElementById('s3-force-path-style').checked,
+          buckets: buckets
+        };
+
+        const response = await fetch('/setup/create-s3-buckets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(s3Config)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          let html = '<div class="test-result success mt-2"><i class="bi bi-check-circle-fill"></i> Buckets created successfully!</div>';
+          if (data.created && data.created.length > 0) {
+            html += '<div class="alert alert-info mt-2"><small><strong>Created:</strong> ' + data.created.join(', ') + '</small></div>';
+          }
+          if (data.existed && data.existed.length > 0) {
+            html += '<div class="alert alert-warning mt-2"><small><strong>Already existed:</strong> ' + data.existed.join(', ') + '</small></div>';
+          }
+          result.innerHTML = html;
+        } else {
+          result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Failed to create buckets: ' + data.error + '</div>';
+        }
+      } catch (error) {
+        result.innerHTML = '<div class="test-result error mt-2"><i class="bi bi-x-circle-fill"></i> Error: ' + error.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-bucket"></i> Create Selected Buckets';
+      }
+    }
+  </script>
+</body>
+</html>

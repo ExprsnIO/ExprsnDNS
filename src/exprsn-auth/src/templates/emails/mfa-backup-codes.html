@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your MFA Backup Codes</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      color: #007bff;
+      text-decoration: none;
+    }
+    h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .warning {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .codes {
+      background-color: #f8f9fa;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      padding: 30px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .codes h3 {
+      margin-top: 0;
+      color: #007bff;
+    }
+    .code-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .code {
+      background-color: #ffffff;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      border: 1px solid #dee2e6;
+    }
+    .instructions {
+      background-color: #d1ecf1;
+      border-left: 4px solid #17a2b8;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: #007bff;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .unsubscribe {
+      font-size: 12px;
+      color: #999;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="{{appUrl}}" class="logo">{{appName}}</a>
+    </div>
+
+    <h1>Your MFA Backup Codes</h1>
+
+    <p>Hi {{displayName}},</p>
+
+    <p>You've successfully enabled two-factor authentication (MFA) on your {{appName}} account. Great job securing your account!</p>
+
+    <div class="warning">
+      <strong>Important:</strong> Save these backup codes in a safe place. You can use them to access your account if you lose access to your authenticator device.
+    </div>
+
+    <div class="codes">
+      <h3>Your Backup Codes</h3>
+      <div class="code-list">
+        {{#each backupCodes}}
+        <div class="code">{{this}}</div>
+        {{/each}}
+      </div>
+      <p style="margin-bottom: 0; font-size: 14px; color: #666;">Each code can only be used once</p>
+    </div>
+
+    <div class="instructions">
+      <strong>How to Use Backup Codes:</strong>
+      <ol style="margin: 10px 0 0 0; padding-left: 20px;">
+        <li>When prompted for your authenticator code, enter one of these backup codes instead</li>
+        <li>Each code can only be used once</li>
+        <li>Generate new codes from your security settings when you run low</li>
+      </ol>
+    </div>
+
+    <p><strong>Keep These Codes Secure:</strong></p>
+    <ul>
+      <li>Store them in a password manager or encrypted file</li>
+      <li>Print them and keep in a safe place</li>
+      <li>Don't share them with anyone</li>
+      <li>Don't store them in plain text on your device</li>
+    </ul>
+
+    <div style="text-align: center;">
+      <a href="{{securityUrl}}" class="button">Manage Security Settings</a>
+    </div>
+
+    <p>You can generate new backup codes at any time from your security settings. When you generate new codes, the old ones will stop working.</p>
+
+    <div class="footer">
+      <p>Need help? Contact us at <a href="mailto:support@exprsn.io">support@exprsn.io</a></p>
+      <p><a href="{{appUrl}}">{{appName}}</a></p>
+      <p class="unsubscribe">
+        This is a security notification. You're receiving this because you enabled MFA on your {{appName}} account.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

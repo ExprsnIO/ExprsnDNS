@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Exprsn Auth Admin</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Exprsn WCAG-Compliant Theme -->
+    <link href="/css/admin.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --exprsn-primary: #0066cc;
+            --exprsn-success: #28a745;
+            --exprsn-warning: #ffc107;
+            --exprsn-danger: #dc3545;
+            --exprsn-dark: #212529;
+            --exprsn-light: #f8f9fa;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--exprsn-light);
+        }
+
+        .admin-sidebar {
+            min-height: 100vh;
+            background-color: var(--exprsn-dark);
+            color: white;
+            padding-top: 1rem;
+        }
+
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.25rem 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            background-color: var(--exprsn-primary);
+            color: white;
+        }
+
+        .admin-sidebar .nav-link i {
+            width: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .admin-header {
+            background-color: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            border-left: 4px solid var(--exprsn-primary);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .table-actions .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .badge-status {
+            padding: 0.35em 0.65em;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* WCAG Compliance */
+        .focus-visible:focus-visible {
+            outline: 3px solid var(--exprsn-primary);
+            outline-offset: 2px;
+        }
+
+        /* Dark mode support */
+        [data-bs-theme="dark"] {
+            --exprsn-light: #212529;
+            --exprsn-dark: #f8f9fa;
+        }
+
+        [data-bs-theme="dark"] .admin-header {
+            background-color: #2c3034;
+            border-bottom-color: #495057;
+        }
+
+        [data-bs-theme="dark"] .stat-card {
+            background-color: #2c3034;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar">
+                <div class="position-sticky">
+                    <div class="px-3 pb-3 mb-3 border-bottom border-secondary">
+                        <h5 class="text-white">
+                            <i class="bi bi-shield-check"></i>
+                            Exprsn Auth
+                        </h5>
+                        <small class="text-white-50">Admin Console</small>
+                    </div>
+
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link <%= (currentPath === '/admin' || currentPath === '/admin/') ? 'active' : '' %>"
+                               href="/admin"
+                               aria-label="Dashboard">
+                                <i class="bi bi-speedometer2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/users') ? 'active' : '' %>"
+                               href="/admin/users"
+                               aria-label="User Management">
+                                <i class="bi bi-people"></i>
+                                Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/organizations') ? 'active' : '' %>"
+                               href="/admin/organizations"
+                               aria-label="Organization Management">
+                                <i class="bi bi-building"></i>
+                                Organizations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/applications') ? 'active' : '' %>"
+                               href="/admin/applications"
+                               aria-label="Application Management">
+                                <i class="bi bi-app-indicator"></i>
+                                Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/roles') ? 'active' : '' %>"
+                               href="/admin/roles"
+                               aria-label="Role Management">
+                                <i class="bi bi-key"></i>
+                                Roles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/sessions') ? 'active' : '' %>"
+                               href="/admin/sessions"
+                               aria-label="Active Sessions">
+                                <i class="bi bi-clock-history"></i>
+                                Sessions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <%= currentPath?.startsWith('/admin/settings') ? 'active' : '' %>"
+                               href="/admin/settings"
+                               aria-label="System Settings">
+                                <i class="bi bi-gear"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+
+                    <hr class="border-secondary my-3">
+
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="/api/health"
+                               target="_blank"
+                               aria-label="Health Check">
+                                <i class="bi bi-heart-pulse"></i>
+                                Health Check
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="/api/auth/logout"
+                               aria-label="Logout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Header -->
+                <div class="admin-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0"><%= title %></h2>
+                        <% if (locals.subtitle) { %>
+                        <p class="text-muted mb-0"><%= subtitle %></p>
+                        <% } %>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Theme Toggle -->
+                        <button id="theme-toggle"
+                                class="btn btn-outline-secondary"
+                                aria-label="Toggle dark mode">
+                            <i class="bi bi-moon-stars" id="theme-icon"></i>
+                        </button>
+
+                        <!-- User Info -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle"
+                                    type="button"
+                                    id="userMenu"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                <%= user?.username || 'Admin' %>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="/admin/profile">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/api/auth/logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                <% if (locals.successMessage) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <%= successMessage %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% } %>
+
+                <% if (locals.errorMessage) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <%= errorMessage %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% } %>
+
+                <!-- Page Content -->
+                <div class="content-wrapper">
+                    <%- body %>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-bs-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        themeToggle.addEventListener('click', function() {
+            const theme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            htmlElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.classList.remove('bi-moon-stars');
+                themeIcon.classList.add('bi-sun');
+            } else {
+                themeIcon.classList.remove('bi-sun');
+                themeIcon.classList.add('bi-moon-stars');
+            }
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+
+    <!-- Page-specific scripts -->
+    <% if (locals.scripts) { %>
+        <%- scripts %>
+    <% } %>
+</body>
+</html>

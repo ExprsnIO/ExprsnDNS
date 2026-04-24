@@ -1,0 +1,35 @@
+Security Alert
+
+Hi {{displayName}},
+
+SECURITY ALERT: {{eventType}}
+
+{{eventDescription}}
+
+We detected unusual activity on your {{appName}} account and wanted to notify you immediately.
+
+Event Details:
+- Event Type: {{eventType}}
+- Timestamp: {{timestamp}}
+- IP Address: {{ipAddress}}
+- Device: {{userAgent}}
+- Location: {{location}}
+
+Was this you?
+If you recognize this activity, no action is needed.
+
+Wasn't you?
+If you don't recognize this activity, please secure your account immediately by visiting:
+{{securityUrl}}
+
+Recommended actions:
+- Change your password immediately
+- Enable two-factor authentication
+- Review recent account activity
+- Sign out from all devices
+
+---
+Need help? Contact us at support@exprsn.io
+{{appName}}: {{appUrl}}
+
+This is a security alert. You're receiving this to protect your {{appName}} account.

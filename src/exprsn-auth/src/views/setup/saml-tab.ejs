@@ -1,0 +1,42 @@
+<!-- SAML/SSO Tab -->
+<div class="tab-pane fade" id="saml" role="tabpanel">
+  <div class="form-section">
+    <h3><i class="bi bi-diagram-2"></i> SAML 2.0 SSO Configuration</h3>
+    <p class="text-muted">Configure SAML 2.0 Single Sign-On for enterprise identity providers</p>
+
+    <div class="alert alert-info">
+      <strong><i class="bi bi-info-circle"></i> SAML Endpoints</strong><br>
+      <strong>Metadata URL:</strong> <code><%= oidcIssuer %>/api/saml/metadata</code><br>
+      <strong>ACS URL:</strong> <code><%= oidcIssuer %>/api/saml/acs</code><br>
+      <strong>SSO URL:</strong> <code><%= oidcIssuer %>/api/saml/sso</code>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5><i class="bi bi-building"></i> Supported Identity Providers</h5>
+        <ul class="mb-0">
+          <li>Okta</li>
+          <li>Azure Active Directory (Azure AD)</li>
+          <li>Google Workspace</li>
+          <li>OneLogin</li>
+          <li>Auth0</li>
+          <li>Custom SAML 2.0 IdP</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h5>Configuration Steps:</h5>
+      <ol>
+        <li>Download the SP metadata from <code>/api/saml/metadata</code></li>
+        <li>Configure your IdP with the metadata</li>
+        <li>Add IdP metadata URL to environment: <code>SAML_IDP_METADATA_URL</code></li>
+        <li>Restart the auth service</li>
+        <li>Test SSO login at <code>/api/saml/sso</code></li>
+      </ol>
+      <a href="/admin/settings" class="btn btn-primary mt-3">
+        <i class="bi bi-gear"></i> Configure in Admin Settings
+      </a>
+    </div>
+  </div>
+</div>

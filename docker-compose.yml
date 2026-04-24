@@ -1,0 +1,74 @@
+version: '3.9'
+
+# ExprsnDNS - Local development compose.
+# Spins up Postgres + Redis for the three services plus the services themselves.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-exprsn}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-exprsn}
+      POSTGRES_MULTIPLE_DATABASES: exprsn_dns,exprsn_ca,exprsn_auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  exprsn-dns:
+    build:
+      context: .
+      dockerfile: src/exprsn-dns/Dockerfile
+    restart: unless-stopped
+    depends_on: [postgres, redis]
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      DNS_DB_SYNC: "true"
+    ports:
+      - "3053:3053"   # REST API
+      - "53:53/udp"   # DNS UDP
+      - "53:53/tcp"   # DNS TCP
+    cap_add:
+      - NET_BIND_SERVICE
+
+  exprsn-ca:
+    build:
+      context: .
+      dockerfile: src/exprsn-ca/Dockerfile
+    restart: unless-stopped
+    depends_on: [postgres, redis]
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    ports:
+      - "3001:3001"
+
+  exprsn-auth:
+    build:
+      context: .
+      dockerfile: src/exprsn-auth/Dockerfile
+    restart: unless-stopped
+    depends_on: [postgres, redis]
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    ports:
+      - "3002:3002"
+
+volumes:
+  pgdata:
+  redisdata:

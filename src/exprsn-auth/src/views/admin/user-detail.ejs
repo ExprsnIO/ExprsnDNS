@@ -1,0 +1,380 @@
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="/admin/users" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Users
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Profile -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle text-primary me-2"></i>
+                    User Profile
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-circle" style="font-size: 4rem; color: var(--bs-primary);"></i>
+                </div>
+                <h4><%= user.username %></h4>
+                <p class="text-muted"><%= user.email %></p>
+
+                <% if (!user.enabled) { %>
+                <span class="badge bg-danger mb-3">Disabled</span>
+                <% } else if (user.emailVerified) { %>
+                <span class="badge bg-success mb-3">Verified</span>
+                <% } else { %>
+                <span class="badge bg-warning text-dark mb-3">Unverified</span>
+                <% } %>
+
+                <hr>
+
+                <dl class="row text-start">
+                    <dt class="col-sm-5">User ID:</dt>
+                    <dd class="col-sm-7"><small><code><%= user.id %></code></small></dd>
+
+                    <dt class="col-sm-5">Created:</dt>
+                    <dd class="col-sm-7"><small><%= new Date(user.createdAt).toLocaleString() %></small></dd>
+
+                    <dt class="col-sm-5">Last Login:</dt>
+                    <dd class="col-sm-7">
+                        <small>
+                            <% if (user.lastLogin) { %>
+                            <%= new Date(user.lastLogin).toLocaleString() %>
+                            <% } else { %>
+                            Never
+                            <% } %>
+                        </small>
+                    </dd>
+
+                    <dt class="col-sm-5">MFA Enabled:</dt>
+                    <dd class="col-sm-7">
+                        <% if (user.mfaEnabled) { %>
+                        <span class="badge bg-success">Yes</span>
+                        <% } else { %>
+                        <span class="badge bg-secondary">No</span>
+                        <% } %>
+                    </dd>
+                </dl>
+
+                <div class="d-grid gap-2 mt-3">
+                    <% if (user.enabled) { %>
+                    <button class="btn btn-warning" onclick="toggleUserStatus('<%= user.id %>', 'disable')">
+                        <i class="bi bi-slash-circle"></i> Disable User
+                    </button>
+                    <% } else { %>
+                    <button class="btn btn-success" onclick="toggleUserStatus('<%= user.id %>', 'enable')">
+                        <i class="bi bi-check-circle"></i> Enable User
+                    </button>
+                    <% } %>
+                    <button class="btn btn-outline-danger" onclick="deleteUser('<%= user.id %>')">
+                        <i class="bi bi-trash"></i> Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- User Roles -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    Roles & Permissions
+                </h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
+                    <i class="bi bi-plus-circle"></i> Assign Role
+                </button>
+            </div>
+            <div class="card-body">
+                <% if (user.Roles && user.Roles.length > 0) { %>
+                <div class="d-flex flex-wrap gap-2">
+                    <% user.Roles.forEach(role => { %>
+                    <div class="badge bg-primary p-2">
+                        <%= role.name %>
+                        <button class="btn-close btn-close-white ms-2"
+                                onclick="removeRole('<%= user.id %>', '<%= role.id %>')"
+                                aria-label="Remove role"></button>
+                    </div>
+                    <% }) %>
+                </div>
+                <% } else { %>
+                <p class="text-muted mb-0">No roles assigned</p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Organizations -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-building text-primary me-2"></i>
+                    Organizations
+                </h5>
+            </div>
+            <div class="card-body">
+                <% if (user.Organizations && user.Organizations.length > 0) { %>
+                <ul class="list-group">
+                    <% user.Organizations.forEach(org => { %>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <%= org.name %>
+                        <a href="/admin/organizations/<%= org.id %>" class="btn btn-sm btn-outline-primary">
+                            View
+                        </a>
+                    </li>
+                    <% }) %>
+                </ul>
+                <% } else { %>
+                <p class="text-muted mb-0">Not a member of any organization</p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>
+                    Active Sessions
+                </h5>
+                <button class="btn btn-sm btn-warning" onclick="revokeAllSessions('<%= user.id %>')">
+                    <i class="bi bi-x-circle"></i> Revoke All
+                </button>
+            </div>
+            <div class="card-body">
+                <% if (sessions && sessions.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>IP Address</th>
+                                <th>Last Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% sessions.forEach(session => { %>
+                            <tr>
+                                <td>
+                                    <small>
+                                        <% if (session.userAgent && session.userAgent.includes('Mobile')) { %>
+                                        <i class="bi bi-phone"></i> Mobile
+                                        <% } else { %>
+                                        <i class="bi bi-display"></i> Browser
+                                        <% } %>
+                                    </small>
+                                </td>
+                                <td><code class="small"><%= session.ipAddress %></code></td>
+                                <td><small><%= new Date(session.lastActivity).toLocaleString() %></small></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="revokeSession('<%= session.id %>')">
+                                        Revoke
+                                    </button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-muted mb-0">No active sessions</p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-text text-primary me-2"></i>
+                    Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <% if (auditLogs && auditLogs.length > 0) { %>
+                <div class="list-group">
+                    <% auditLogs.forEach(log => { %>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><%= log.action %></h6>
+                            <small><%= new Date(log.createdAt).toLocaleString() %></small>
+                        </div>
+                        <% if (log.details) { %>
+                        <p class="mb-1 text-muted small"><%= log.details %></p>
+                        <% } %>
+                        <small class="text-muted">IP: <%= log.ipAddress %></small>
+                    </div>
+                    <% }) %>
+                </div>
+                <% } else { %>
+                <p class="text-muted mb-0">No recent activity</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Role Modal -->
+<div class="modal fade" id="assignRoleModal" tabindex="-1" aria-labelledby="assignRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignRoleModalLabel">Assign Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="roleSelect" class="form-label">Select Role</label>
+                    <select class="form-select" id="roleSelect">
+                        <option value="">Choose a role...</option>
+                        <% if (availableRoles) { %>
+                            <% availableRoles.forEach(role => { %>
+                            <option value="<%= role.id %>"><%= role.name %></option>
+                            <% }) %>
+                        <% } %>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="assignRole('<%= user.id %>')">Assign Role</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% locals.scripts = `
+<script>
+    async function toggleUserStatus(userId, action) {
+        if (confirm(\`Are you sure you want to \${action} this user?\`)) {
+            try {
+                const response = await fetch(\`/api/users/\${userId}/\${action}\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Action failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function deleteUser(userId) {
+        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            try {
+                const response = await fetch(\`/api/users/\${userId}\`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/admin/users';
+                } else {
+                    alert('Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function assignRole(userId) {
+        const roleId = document.getElementById('roleSelect').value;
+        if (!roleId) {
+            alert('Please select a role');
+            return;
+        }
+
+        try {
+            const response = await fetch(\`/api/users/\${userId}/roles\`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roleId })
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to assign role');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred');
+        }
+    }
+
+    async function removeRole(userId, roleId) {
+        if (confirm('Are you sure you want to remove this role?')) {
+            try {
+                const response = await fetch(\`/api/users/\${userId}/roles/\${roleId}\`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to remove role');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function revokeSession(sessionId) {
+        if (confirm('Are you sure you want to revoke this session?')) {
+            try {
+                const response = await fetch(\`/api/sessions/\${sessionId}/revoke\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to revoke session');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+
+    async function revokeAllSessions(userId) {
+        if (confirm('Are you sure you want to revoke all sessions for this user?')) {
+            try {
+                const response = await fetch(\`/api/users/\${userId}/sessions/revoke-all\`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to revoke sessions');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    }
+</script>
+`; %>
