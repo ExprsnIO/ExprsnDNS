@@ -1,19 +1,25 @@
 import crypto from "node:crypto";
+import {
+  canonicalTokenJson as embeddedCanonicalTokenJson,
+  sha256Hex,
+  verifyCanonicalSignature,
+} from "./exprsn-ca.js";
 
 /**
- * Client for the Exprsn-CA service.
+ * HTTP client for an external Exprsn-CA service.
  *
- * Mirrors upstream wire semantics from ExprsnIO/Exprsn:
+ * Historically ExprsnDNS spoke to Exprsn-CA over HTTP. With the embedded CA
+ * (`src/exprsn-ca.js`) this client is now optional: it is retained so an
+ * operator can still point ExprsnDNS at a separately-deployed CA when
+ * desired, and so the upstream wire format stays in one place.
+ *
+ * Wire contract (mirrors upstream `ExprsnIO/Exprsn` / `src/exprsn-ca`):
  *   - Bearer headers: "Bearer <tokenId>" or "CA-Token <tokenId>".
  *   - Service headers on outbound calls: X-Service-ID, X-Service-Token,
  *     X-Service-Name.
  *   - Validation endpoint: POST {baseUrl}/api/tokens/validate { tokenId }.
  *   - Certificate issuance: POST {baseUrl}/api/certificates/generate.
- *   - Canonical checksum over a signed token:
- *       sha256(JSON.stringify(obj, Object.keys(obj).sort())).
- *     We replicate Node's JSON.stringify replacer-array behavior exactly
- *     so local verification matches byte-for-byte.
- *   - Signature: RSA-PSS with SHA-256 and salt length 32.
+ *   - Canonical checksum / signature: see `exprsn-ca.js`.
  *   - All timestamps are milliseconds since the Unix epoch.
  */
 export class CAClient {
@@ -70,10 +76,6 @@ export class CAClient {
     }
   }
 
-  /**
-   * Validate a bearer token ID against the CA.
-   * Returns { valid, token, user, error }.
-   */
   async validateToken(tokenId, { resource, permission, forwardedFor } = {}) {
     const extra = forwardedFor ? { "x-forwarded-for": forwardedFor } : {};
     const { ok, status, body } = await this._post(
@@ -92,10 +94,6 @@ export class CAClient {
     };
   }
 
-  /**
-   * Ask the CA to issue an entity certificate for a .exprsn token.
-   * Returns the CA's response body (certificate metadata + PEM).
-   */
   async issueCertificate({ token, email, ownerId, keySize = 2048, validityDays = 365 }) {
     const { ok, status, body } = await this._post("/api/certificates/generate", {
       type: "entity",
@@ -129,6 +127,38 @@ export class CAClient {
   }
 }
 
+/**
+ * Adapter that lets the embedded `ExprsnCA` plug in wherever an HTTP
+ * `CAClient` was previously expected (auth middleware, API routes).
+ *
+ * Method signatures are identical to `CAClient`; the implementation just
+ * forwards to the in-process CA.
+ */
+export class EmbeddedCAAdapter {
+  constructor(ca, { serviceId = "exprsn-dns" } = {}) {
+    if (!ca) throw new Error("EmbeddedCAAdapter requires an ExprsnCA instance");
+    this.ca = ca;
+    this.serviceId = serviceId;
+    this.baseUrl = ca.baseUrl;
+  }
+
+  get enabled() {
+    return true;
+  }
+
+  async validateToken(tokenId, opts = {}) {
+    return await this.ca.validateToken(tokenId, opts);
+  }
+
+  async issueCertificate(args) {
+    return await this.ca.issueCertificate(args);
+  }
+
+  async revokeToken(tokenId, reason) {
+    return await this.ca.revokeToken(tokenId, reason);
+  }
+}
+
 export function extractBearer(headerValue) {
   if (!headerValue || typeof headerValue !== "string") return null;
   const m = headerValue.match(/^(Bearer|CA-Token)\s+(.+)$/i);
@@ -136,46 +166,27 @@ export function extractBearer(headerValue) {
 }
 
 /**
- * Upstream canonicalization: JSON.stringify(obj, Object.keys(obj).sort()).
- * We replicate the replacer-array call exactly; Node's JSON serializer will
- * produce byte-identical output to the upstream Node implementation.
+ * Upstream canonicalization: `JSON.stringify(obj, Object.keys(obj).sort())`.
+ * Note: applying a replacer array is recursive, so only top-level keys are
+ * filtered/sorted - load-bearing quirk of the upstream format.
  */
 export function canonicalTokenJson(obj) {
-  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
-    throw new TypeError("canonicalTokenJson requires a plain object");
-  }
-  const keys = Object.keys(obj).sort();
-  return JSON.stringify(obj, keys);
+  return embeddedCanonicalTokenJson(obj);
 }
 
 export function tokenChecksum(obj) {
-  return crypto
-    .createHash("sha256")
-    .update(canonicalTokenJson(obj))
-    .digest("hex");
+  return sha256Hex(canonicalTokenJson(obj));
 }
 
 /**
  * Verify the signature of a signed CA token payload.
  *
- * @param {object} tokenBody - the token's canonical body (same shape the CA hashed)
+ * @param {object} tokenBody - the token's canonical body
  * @param {string} signatureB64 - base64-encoded RSA-PSS signature
  * @param {string|Buffer|crypto.KeyObject} publicKeyPem - signer's public key
- * @returns {boolean}
  */
 export function verifyTokenSignature(tokenBody, signatureB64, publicKeyPem) {
-  const canonical = canonicalTokenJson(tokenBody);
-  return crypto.verify(
-    "sha256",
-    Buffer.from(canonical, "utf8"),
-    {
-      key: publicKeyPem,
-      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-      saltLength: 32,
-      mgf1Hash: "sha256",
-    },
-    Buffer.from(signatureB64, "base64"),
-  );
+  return verifyCanonicalSignature(tokenBody, signatureB64, publicKeyPem);
 }
 
 function safeJson(text) {
@@ -185,3 +196,6 @@ function safeJson(text) {
     return null;
   }
 }
+
+// Re-export so callers can use a single `crypto` reference if they wish.
+export { crypto };
